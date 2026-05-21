@@ -1,0 +1,2987 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="xterm/xterm.css" />
+    <script src="xterm/xterm.js"></script>
+    <style>
+         :root {
+            /* 与设置中字号联动，由 JS 写入实际 px */
+            --wt-ui-font-base: 22px;
+            /* Windows Terminal / Fluent 深色：整体偏黑 + 蓝色强调 */
+            --wt-chrome: #1f1f1f;
+            --wt-tab-active-bg: #2a2a2a;
+            --wt-tab-inactive: transparent;
+            --wt-tab-border: transparent;
+            --wt-tabbar-border: rgba(255, 255, 255, 0.06);
+            --wt-tab-active-fg: #ffffff;
+            --wt-tab-active-border: transparent;
+            --wt-tab-accent-line: #0078d4;
+            --wt-canvas: #0c0c0c;
+            --wt-text: rgba(255, 255, 255, 0.78);
+            --wt-accent-blue: #0078d4;
+            --wt-accent-blue-dim: #0063b1;
+            --wt-press-bg: rgba(255, 255, 255, 0.08);
+            --wt-transition-fast: 0.12s ease-out;
+            --wt-tabs-strip-scrollbar-thumb: #5c5c5c;
+            --wt-dropdown-bg: #2d2d2d;
+            --wt-dropdown-border: rgba(255, 255, 255, 0.08);
+            --wt-dropdown-shadow: 0 8px 32px rgba(0, 0, 0, 0.54), 0 0 1px rgba(0, 0, 0, 0.35);
+            --wt-menu-fg: #f3f3f3;
+            --wt-menu-hover: rgba(255, 255, 255, 0.06);
+            --wt-menu-active: rgba(255, 255, 255, 0.1);
+            --wt-menu-sep: rgba(255, 255, 255, 0.06);
+            --wt-btn-icon-fg: #e8e8e8;
+            --wt-btn-icon-bg: transparent;
+            --wt-btn-icon-inset: none;
+            --wt-btn-icon-hover-bg: rgba(255, 255, 255, 0.08);
+            --wt-btn-icon-hover-border: rgba(255, 255, 255, 0.06);
+            --wt-tab-icon-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.28);
+            --wt-tab-close-hover: rgba(255, 255, 255, 0.08);
+            --wt-tab-close-active: rgba(255, 255, 255, 0.12);
+            --wt-settings-nav-bg: #2d2d2d;
+            --wt-settings-nav-border: rgba(255, 255, 255, 0.06);
+            --wt-settings-nav-thumb: #6e6e6e;
+            --wt-settings-nav-scroll-track: #2d2d2d;
+            --wt-settings-main-bg: #1e1e1e;
+            --wt-settings-embed-bg: #1e1e1e;
+            --wt-settings-pages-scroll-fg: #6f6f6f;
+            --wt-settings-pages-scroll-bg: #1e1e1e;
+            --wt-settings-pages-thumb: #5e5e5e;
+            --wt-settings-pages-thumb-border: #1e1e1e;
+            --wt-settings-footer-bg: #2d2d2d;
+            --wt-settings-footer-border: rgba(255, 255, 255, 0.06);
+            --wt-set-nav-fg: rgba(255, 255, 255, 0.72);
+            --wt-set-nav-active-fg: #ffffff;
+            --wt-set-nav-active-bg: rgba(255, 255, 255, 0.06);
+            --wt-set-nav-press: rgba(255, 255, 255, 0.04);
+            --wt-set-page-desc: rgba(255, 255, 255, 0.58);
+            --wt-color-scheme-card-bg: rgba(255, 255, 255, 0.04);
+            --wt-color-scheme-card-border: rgba(255, 255, 255, 0.08);
+            --wt-color-scheme-card-fg: #f3f3f3;
+            --wt-color-scheme-card-hover: rgba(255, 255, 255, 0.07);
+            --wt-color-card-p: rgba(255, 255, 255, 0.58);
+            --wt-color-scheme-active-bg: rgba(0, 120, 212, 0.14);
+            --wt-color-scheme-active-shadow: rgba(0, 120, 212, 0.45);
+            --wt-set-page-title: #ffffff;
+            --wt-set-card-bg: rgba(255, 255, 255, 0.03);
+            --wt-set-card-border: rgba(255, 255, 255, 0.06);
+            --wt-set-card-h3: #ffffff;
+            --wt-set-card-p: rgba(255, 255, 255, 0.6);
+            --wt-set-select-bg: #2d2d2d;
+            --wt-set-select-border: rgba(255, 255, 255, 0.12);
+            --wt-set-select-fg: #ffffff;
+            --wt-toggle-track-off: #5c5c5c;
+            --wt-toggle-knob: #ffffff;
+            --wt-toggle-knob-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
+            --wt-set-btn-primary-fg: #ffffff;
+            --wt-set-btn-secondary-border: rgba(255, 255, 255, 0.14);
+            --wt-set-btn-secondary-bg: rgba(255, 255, 255, 0.06);
+            --wt-set-btn-secondary-fg: #f3f3f3;
+            --wt-set-btn-secondary-active-bg: rgba(255, 255, 255, 0.1);
+            --wt-settings-actions-border: rgba(255, 255, 255, 0.06);
+            --wt-term-rail-bg: #2e2e2e;
+            --wt-term-rail-border: rgba(255, 255, 255, 0.12);
+            --wt-term-scroll-thumb: linear-gradient(180deg, #d0d0d0 0%, #898989 45%, #606060 100%);
+            --wt-term-scroll-thumb-active: linear-gradient(180deg, #e8e8e8 0%, #9a9a9a 100%);
+            --wt-term-scroll-thumb-inset: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 2px 4px rgba(0, 0, 0, 0.45);
+            --wt-swatch-outline: rgba(0, 0, 0, 0.15);
+            --wt-settings-gear-filter: none;
+        }
+        
+        html[data-wt-app-scheme="lightcream"] {
+            --wt-chrome: #ece7df;
+            --wt-tab-active-bg: rgba(255, 255, 255, 0.72);
+            --wt-tab-inactive: transparent;
+            --wt-tab-border: transparent;
+            --wt-tabbar-border: rgba(0, 0, 0, 0.08);
+            --wt-tab-active-fg: #1a1a1a;
+            --wt-tab-accent-line: #0f6cbd;
+            --wt-canvas: #faf7f0;
+            --wt-text: rgba(0, 0, 0, 0.74);
+            --wt-accent-blue: #0f6cbd;
+            --wt-accent-blue-dim: #0a5599;
+            --wt-press-bg: rgba(0, 0, 0, 0.06);
+            --wt-tabs-strip-scrollbar-thumb: #9e988e;
+            --wt-dropdown-bg: #ffffff;
+            --wt-dropdown-border: rgba(0, 0, 0, 0.1);
+            --wt-dropdown-shadow: 0 8px 32px rgba(0, 0, 0, 0.16);
+            --wt-menu-fg: #1a1a1a;
+            --wt-menu-hover: rgba(0, 0, 0, 0.04);
+            --wt-menu-active: rgba(0, 0, 0, 0.08);
+            --wt-menu-sep: rgba(0, 0, 0, 0.08);
+            --wt-btn-icon-fg: #242424;
+            --wt-btn-icon-bg: transparent;
+            --wt-btn-icon-inset: none;
+            --wt-btn-icon-hover-bg: rgba(0, 0, 0, 0.06);
+            --wt-btn-icon-hover-border: rgba(0, 0, 0, 0.08);
+            --wt-tab-icon-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 1px 2px rgba(0, 0, 0, 0.12);
+            --wt-tab-close-hover: rgba(0, 0, 0, 0.06);
+            --wt-tab-close-active: rgba(0, 0, 0, 0.1);
+            --wt-settings-nav-bg: #f0ebe3;
+            --wt-settings-nav-border: rgba(0, 0, 0, 0.08);
+            --wt-settings-nav-thumb: #a39e94;
+            --wt-settings-nav-scroll-track: #f0ebe3;
+            --wt-settings-main-bg: #faf7f0;
+            --wt-settings-embed-bg: #faf7f0;
+            --wt-settings-pages-scroll-fg: #a39e94;
+            --wt-settings-pages-scroll-bg: #faf7f0;
+            --wt-settings-pages-thumb: #b8b3a8;
+            --wt-settings-pages-thumb-border: #faf7f0;
+            --wt-settings-footer-bg: #f5f2eb;
+            --wt-settings-footer-border: rgba(0, 0, 0, 0.08);
+            --wt-set-nav-fg: rgba(0, 0, 0, 0.68);
+            --wt-set-nav-active-fg: #141414;
+            --wt-set-nav-active-bg: rgba(0, 0, 0, 0.05);
+            --wt-set-nav-press: rgba(0, 0, 0, 0.04);
+            --wt-set-page-desc: rgba(0, 0, 0, 0.54);
+            --wt-color-scheme-card-bg: rgba(255, 255, 255, 0.7);
+            --wt-color-scheme-card-border: rgba(0, 0, 0, 0.1);
+            --wt-color-scheme-card-fg: #141414;
+            --wt-color-scheme-card-hover: rgba(0, 0, 0, 0.03);
+            --wt-color-card-p: rgba(0, 0, 0, 0.54);
+            --wt-color-scheme-active-bg: rgba(15, 108, 189, 0.12);
+            --wt-color-scheme-active-shadow: rgba(15, 108, 189, 0.38);
+            --wt-set-page-title: #141414;
+            --wt-set-card-bg: rgba(255, 255, 255, 0.55);
+            --wt-set-card-border: rgba(0, 0, 0, 0.1);
+            --wt-set-card-h3: #141414;
+            --wt-set-card-p: rgba(0, 0, 0, 0.58);
+            --wt-set-select-bg: #ffffff;
+            --wt-set-select-border: rgba(0, 0, 0, 0.12);
+            --wt-set-select-fg: #1a1a1a;
+            --wt-toggle-track-off: #9a948a;
+            --wt-toggle-knob: #ffffff;
+            --wt-toggle-knob-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+            --wt-set-btn-primary-fg: #ffffff;
+            --wt-set-btn-secondary-border: rgba(0, 0, 0, 0.12);
+            --wt-set-btn-secondary-bg: rgba(0, 0, 0, 0.04);
+            --wt-set-btn-secondary-fg: #1a1a1a;
+            --wt-set-btn-secondary-active-bg: rgba(0, 0, 0, 0.07);
+            --wt-settings-actions-border: rgba(0, 0, 0, 0.08);
+            --wt-term-rail-bg: #ede8df;
+            --wt-term-rail-border: rgba(0, 0, 0, 0.1);
+            --wt-term-scroll-thumb: linear-gradient(180deg, #ffffff 0%, #c4bfb6 42%, #9e988e 100%);
+            --wt-term-scroll-thumb-active: linear-gradient(180deg, #ffffff 0%, #aeaaa2 100%);
+            --wt-term-scroll-thumb-inset: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 2px 4px rgba(0, 0, 0, 0.2);
+            --wt-swatch-outline: rgba(0, 0, 0, 0.12);
+            --wt-settings-gear-filter: brightness(0.25);
+        }
+        
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            max-height: 100%;
+            background-color: var(--wt-chrome);
+            overflow: hidden;
+            overscroll-behavior: none;
+            -webkit-overflow-scrolling: auto;
+            /* 避免 WebView 内整页随内容/焦点滚动，把菜单栏顶出视口 */
+            position: fixed;
+            left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI Variable', 'Segoe UI', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        #wt-root.wt-root--hide-tabs-strip #wt-tabs-strip {
+            display: none !important;
+        }
+        
+        #wt-tabs-strip.wt-tabs-strip--compact .wt-tab:not(.wt-tab-active) {
+            max-width: 52px;
+            min-width: 44px;
+            padding: 0 8px 0 6px;
+            overflow: hidden;
+        }
+        
+        #wt-tabs-strip.wt-tabs-strip--compact .wt-tab:not(.wt-tab-active) .wt-tab-title {
+            display: none;
+        }
+        
+        #wt-tabbar.wt-tabbar--acrylic {
+            background: rgba(45, 45, 45, 0.72);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        
+        html[data-wt-app-scheme="lightcream"] #wt-tabbar.wt-tabbar--acrylic {
+            background: rgba(230, 226, 216, 0.78);
+        }
+        
+        #wt-root.wt-root--no-pane-anim .wt-term-pane,
+        #wt-root.wt-root--no-pane-anim .wt-tab {
+            transition: none !important;
+        }
+        
+        .wt-color-scheme-toolbar {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+            max-width: 720px;
+        }
+        
+        .wt-color-scheme-add {
+            padding: 8px 16px;
+            border-radius: 4px;
+            border: 1px solid var(--wt-set-btn-secondary-border);
+            background: var(--wt-set-btn-secondary-bg);
+            color: var(--wt-set-btn-secondary-fg);
+            font-size: calc(var(--wt-ui-font-base) * 0.9286);
+            cursor: not-allowed;
+            opacity: 0.55;
+        }
+        
+        .wt-color-scheme-list.wt-color-scheme-list--vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-width: 720px;
+        }
+        
+        .wt-color-scheme-card.wt-color-scheme-card--row {
+            width: 100%;
+            max-width: none;
+            margin: 0;
+            justify-content: flex-start;
+        }
+        
+        .wt-color-scheme-card.wt-color-scheme-card--row .wt-color-card-text h3 {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        
+        .wt-set-btn-danger {
+            padding: 8px 18px;
+            border-radius: 4px;
+            border: 1px solid #c42b1c;
+            background: rgba(196, 43, 28, 0.12);
+            color: #ff8a78;
+            font-size: calc(var(--wt-ui-font-base) * 0.9286);
+            cursor: pointer;
+        }
+        
+        .wt-set-btn-danger:hover {
+            background: rgba(196, 43, 28, 0.2);
+        }
+        
+        .wt-set-btn-danger:active {
+            background: rgba(196, 43, 28, 0.28);
+        }
+        
+        html[data-wt-app-scheme="lightcream"] .wt-set-btn-danger {
+            color: #a4262c;
+            border-color: #c42b1c;
+            background: rgba(196, 43, 28, 0.08);
+        }
+        
+        .wt-actions-toolbar {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+            max-width: 720px;
+        }
+        
+        .wt-actions-toolbar-hint {
+            font-size: calc(var(--wt-ui-font-base) * 0.9286);
+            color: var(--wt-set-page-desc);
+        }
+        
+        .wt-actions-add-btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            border: 1px solid var(--wt-set-btn-secondary-border);
+            background: var(--wt-set-btn-secondary-bg);
+            color: var(--wt-set-btn-secondary-fg);
+            font-size: calc(var(--wt-ui-font-base) * 0.9286);
+            cursor: not-allowed;
+            opacity: 0.55;
+        }
+        
+        .wt-actions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            max-width: 800px;
+            max-height: min(72vh, 680px);
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        
+        .wt-action-row {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 12px 14px;
+            border-radius: 6px;
+            background: var(--wt-set-card-bg);
+            border: 1px solid var(--wt-set-card-border);
+        }
+        
+        .wt-action-label {
+            font-size: calc(var(--wt-ui-font-base) * 1);
+            color: var(--wt-set-card-h3);
+            line-height: 1.45;
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .wt-action-keys {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: flex-end;
+            flex-shrink: 0;
+            max-width: 56%;
+        }
+        
+        .wt-key-pill {
+            font-family: Consolas, 'Cascadia Mono', 'Sarasa Mono SC', monospace;
+            font-size: calc(var(--wt-ui-font-base) * 0.8571);
+            padding: 4px 10px;
+            border-radius: 4px;
+            border: 1px solid var(--wt-set-btn-secondary-border);
+            background: var(--wt-chrome);
+            color: var(--wt-set-card-h3);
+            white-space: nowrap;
+        }
+        
+        .wt-color-scheme-badge {
+            font-size: calc(var(--wt-ui-font-base) * 0.7857);
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: var(--wt-accent-blue);
+            color: var(--wt-set-btn-primary-fg);
+        }
+        
+        .wt-set-toggle.wt-toggle-disabled {
+            opacity: 0.45;
+            pointer-events: none;
+        }
+        
+        .wt-set-link-inline {
+            display: inline-block;
+            margin-top: 8px;
+            font-size: calc(var(--wt-ui-font-base) * 0.9286);
+            color: var(--wt-accent-blue);
+            text-decoration: none;
+        }
+        
+        .wt-set-link-inline:hover {
+            text-decoration: underline;
+        }
+        
+        .wt-set-page-h2 {
+            font-size: calc(var(--wt-ui-font-base) * 1.1);
+            font-weight: 600;
+            color: var(--wt-set-page-title);
+            margin: 28px 0 12px;
+            max-width: 720px;
+        }
+        
+        .wt-ntm-list-wrap {
+            border: 1px solid var(--wt-set-card-border);
+            border-radius: 6px;
+            background: var(--wt-set-card-bg);
+            max-width: 720px;
+            overflow: hidden;
+        }
+        
+        .wt-ntm-list-head {
+            display: grid;
+            grid-template-columns: 36px 1fr auto;
+            gap: 8px;
+            align-items: center;
+            padding: 8px 12px;
+            font-size: calc(var(--wt-ui-font-base) * 0.8571);
+            color: var(--wt-set-page-desc);
+            border-bottom: 1px solid var(--wt-set-card-border);
+        }
+        
+        .wt-ntm-row {
+            display: grid;
+            grid-template-columns: 36px 1fr auto;
+            gap: 8px;
+            align-items: center;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--wt-set-card-border);
+            font-size: calc(var(--wt-ui-font-base) * 0.9286);
+            color: var(--wt-set-card-h3);
+        }
+        
+        .wt-ntm-row:last-child {
+            border-bottom: none;
+        }
+        
+        .wt-ntm-row-tools {
+            display: flex;
+            flex-direction: row;
+            gap: 4px;
+            align-items: center;
+        }
+        
+        .wt-ntm-icon-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 4px;
+            background: transparent;
+            color: var(--wt-set-card-h3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            line-height: 1;
+        }
+        
+        .wt-ntm-icon-btn:hover {
+            background: var(--wt-set-btn-secondary-active-bg);
+        }
+        
+        .wt-ntm-icon-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+        
+        .wt-ntm-bulk {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 12px 0 24px;
+            max-width: 720px;
+        }
+        
+        .wt-ntm-bulk button {
+            padding: 8px 14px;
+            border-radius: 4px;
+            border: 1px solid var(--wt-set-btn-secondary-border);
+            background: var(--wt-set-btn-secondary-bg);
+            color: var(--wt-set-btn-secondary-fg);
+            font-size: calc(var(--wt-ui-font-base) * 0.8571);
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
+        .wt-ntm-add-section {
+            max-width: 720px;
+            border: 1px solid var(--wt-set-card-border);
+            border-radius: 6px;
+            background: var(--wt-set-card-bg);
+            overflow: hidden;
+        }
+        
+        .wt-ntm-add-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px;
+            align-items: center;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--wt-set-card-border);
+        }
+        
+        .wt-ntm-add-row:last-child {
+            border-bottom: none;
+        }
+        
+        .wt-ntm-add-row-lead h4 {
+            margin: 0 0 4px;
+            font-size: calc(var(--wt-ui-font-base) * 1);
+            font-weight: 600;
+            color: var(--wt-set-card-h3);
+        }
+        
+        .wt-ntm-add-row-lead p {
+            margin: 0;
+            font-size: calc(var(--wt-ui-font-base) * 0.8571);
+            color: var(--wt-set-card-p);
+            line-height: 1.4;
+        }
+        
+        .wt-ntm-add-row-ctrl {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        
+        .wt-ntm-add-btn {
+            min-width: 40px;
+            height: 36px;
+            padding: 0 14px;
+            border-radius: 4px;
+            border: 1px solid var(--wt-set-btn-secondary-border);
+            background: var(--wt-set-btn-secondary-bg);
+            color: var(--wt-set-btn-secondary-fg);
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+        }
+        
+        .wt-ntm-add-btn:hover:not(:disabled) {
+            background: var(--wt-set-btn-secondary-active-bg);
+        }
+        
+        .wt-ntm-add-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+        
+        .wt-ntm-folder-input {
+            width: 140px;
+            padding: 6px 10px;
+            border-radius: 4px;
+            border: 1px solid var(--wt-set-btn-secondary-border);
+            background: var(--wt-chrome);
+            color: var(--wt-text);
+            font-size: calc(var(--wt-ui-font-base) * 0.9286);
+        }
+        
+        .wt-ext-muted {
+            font-size: calc(var(--wt-ui-font-base) * 0.8571);
+            color: var(--wt-set-page-desc);
+            max-width: 720px;
+            margin: 0 0 16px;
+            line-height: 1.45;
+        }
+        
+        .wt-ext-card {
+            display: grid;
+            grid-template-columns: 40px 1fr auto auto;
+            gap: 12px;
+            align-items: center;
+            max-width: 720px;
+            padding: 14px 16px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            border: 1px solid var(--wt-set-card-border);
+            background: var(--wt-set-card-bg);
+        }
+        
+        .wt-ext-card-ico {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            background: var(--wt-chrome);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        
+        .wt-ext-card-body h4 {
+            margin: 0 0 4px;
+            font-size: calc(var(--wt-ui-font-base) * 1);
+            font-weight: 600;
+            color: var(--wt-set-card-h3);
+        }
+        
+        .wt-ext-card-body p {
+            margin: 0;
+            font-size: calc(var(--wt-ui-font-base) * 0.7857);
+            color: var(--wt-set-card-p);
+            font-family: Consolas, 'Cascadia Mono', monospace;
+            word-break: break-all;
+        }
+        
+        .wt-ext-profile-row {
+            display: grid;
+            grid-template-columns: 36px 1fr auto;
+            gap: 12px;
+            align-items: center;
+            max-width: 720px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            border: 1px solid var(--wt-set-card-border);
+            background: var(--wt-set-card-bg);
+        }
+        
+        .wt-ext-profile-row .wt-set-select {
+            max-width: 280px;
+        }
+        
+        #wt-root {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            max-height: 100%;
+            min-height: 0;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        
+        #wt-tabbar {
+            flex: 0 0 auto;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            background: var(--wt-chrome);
+            border-bottom: 1px solid var(--wt-tabbar-border);
+            user-select: none;
+            -webkit-user-select: none;
+            min-height: 38px;
+            position: sticky;
+            top: 0;
+            z-index: 5000;
+        }
+        /* 标签 + 操作键一组，宽度随内容；右侧留白由 spacer 吃掉，避免 +/▾ 被顶到屏幕最右 */
+        
+        #wt-tabbar-leading {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-end;
+            flex: 0 1 auto;
+            min-width: 0;
+            max-width: 100%;
+        }
+        
+        #wt-tabs-strip {
+            flex: 0 1 auto;
+            min-width: 0;
+            display: flex;
+            flex-direction: row;
+            align-items: flex-end;
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+        
+        #wt-tabbar-spacer {
+            flex: 1 0 0;
+            min-width: 0;
+            min-height: 40px;
+            align-self: stretch;
+            -webkit-app-region: drag;
+        }
+        
+        .wt-window-controls {
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            flex-shrink: 0;
+        }
+        
+        .wt-window-btn {
+            width: 46px;
+            height: 100%;
+            border: none;
+            background: transparent;
+            color: var(--wt-text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: default;
+            transition: background var(--wt-transition-fast), color var(--wt-transition-fast);
+        }
+        
+        .wt-window-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        html[data-wt-app-scheme="lightcream"] .wt-window-btn:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        
+        .wt-window-btn.wt-window-close:hover {
+            background: #c42b1c;
+            color: #ffffff;
+        }
+        
+        .wt-window-btn svg {
+            width: 10px;
+            height: 10px;
+            fill: currentColor;
+        }
+        
+        #wt-tabs-strip::-webkit-scrollbar {
+            height: 4px;
+        }
+        
+        #wt-tabs-strip::-webkit-scrollbar-thumb {
+            background: var(--wt-tabs-strip-scrollbar-thumb);
+            border-radius: 2px;
+        }
+        
+        .wt-tab {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 36px;
+            height: 36px;
+            padding: 0 14px 0 12px;
+            max-width: 260px;
+            font-family: inherit;
+            font-size: calc(var(--wt-ui-font-base) * 0.9);
+            font-weight: 500;
+            color: var(--wt-text);
+            background: var(--wt-tab-inactive);
+            border: none;
+            border-bottom: 3px solid transparent;
+            border-radius: 0;
+            margin: 0 1px 0 0;
+            flex-shrink: 0;
+            transition: background var(--wt-transition-fast), color var(--wt-transition-fast), border-color var(--wt-transition-fast);
+            cursor: default;
+        }
+        
+        .wt-tab:active {
+            transform: none;
+        }
+        
+        .wt-tab:hover:not(.wt-tab-active) {
+            background: rgba(255, 255, 255, 0.04);
+        }
+        
+        html[data-wt-app-scheme="lightcream"] .wt-tab:hover:not(.wt-tab-active) {
+            background: rgba(0, 0, 0, 0.03);
+        }
+        
+        .wt-tab-active {
+            background: var(--wt-tab-active-bg);
+            color: var(--wt-tab-active-fg);
+            border-bottom-color: var(--wt-tab-accent-line, var(--wt-accent-blue));
+        }
+        /* 标签图标：仿 Windows Terminal 轮廓 + 渐变，避免纯色方块 */
+        
+        .wt-tab-icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 5px;
+            flex-shrink: 0;
+            position: relative;
+            box-shadow: var(--wt-tab-icon-shadow);
+            transition: transform var(--wt-transition-fast), box-shadow var(--wt-transition-fast);
+        }
+        
+        .wt-tab-icon--pw {
+            background: linear-gradient(160deg, #5eb0ff 0%, #2a7de0 42%, #124d99 100%);
+        }
+        
+        .wt-tab-icon--pw::after {
+            content: '>';
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: calc(var(--wt-ui-font-base) * 0.7857);
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.95);
+            font-family: 'Cascadia Mono', Consolas, monospace;
+            padding-left: 1px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+        }
+        
+        .wt-tab-icon--khsl {
+            background: linear-gradient(145deg, #9c6dff 0%, #5c6cff 52%, #2a4dad 100%);
+        }
+        
+        .wt-tab-icon--khsl::after {
+            content: 'K';
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: calc(var(--wt-ui-font-base) * 0.7143);
+            font-weight: 800;
+            color: rgba(255, 255, 255, 0.95);
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+        }
+        
+        .wt-tab-icon--daemon {
+            background: linear-gradient(145deg, #ffb74d 0%, #ef6c00 100%);
+        }
+        
+        .wt-tab-icon--daemon::after {
+            content: '#';
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: calc(var(--wt-ui-font-base) * 0.68);
+            font-weight: 800;
+            color: rgba(255, 255, 255, 0.95);
+            font-family: 'Cascadia Mono', Consolas, monospace;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+        }
+        
+        .wt-tab-icon--settings {
+            background: linear-gradient(160deg, #8a8a8a 0%, #4a4a4a 55%, #353535 100%);
+        }
+        
+        .wt-tab-icon--settings::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 10px;
+            height: 10px;
+            margin: -5px 0 0 -5px;
+            background: no-repeat center / contain;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23f0f0f0' d='M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5zm7.4-2.5c0-.33.03-.65.07-.97l2.11-1.65c.2-.15.25-.42.13-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65A.5.5 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.5 0-.61.22l-2 3.46c-.12.22-.07.49.12.64l2.11 1.65c-.04.32-.07.64-.07.97s.03.65.07.97l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.22.08.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65c.04-.32.07-.64.07-.97z'/%3E%3C/svg%3E");
+            opacity: 0.95;
+            filter: var(--wt-settings-gear-filter);
+        }
+        
+        .wt-tab-title {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .wt-tab-close {
+            opacity: 0.55;
+            font-size: calc(var(--wt-ui-font-base) * 1.0714);
+            line-height: 1;
+            padding: 4px 6px;
+            margin: -4px -4px -4px 0;
+            border-radius: 4px;
+            border: none;
+            background: transparent;
+            color: inherit;
+            font: inherit;
+            cursor: default;
+            transition: opacity var(--wt-transition-fast), background var(--wt-transition-fast), transform var(--wt-transition-fast);
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        .wt-tab-close:hover {
+            opacity: 0.95;
+            background: var(--wt-tab-close-hover);
+        }
+        
+        .wt-tab-close:active {
+            transform: scale(0.88);
+            background: var(--wt-tab-close-active);
+        }
+        
+        .wt-tab-active .wt-tab-close:hover {
+            opacity: 1;
+        }
+        
+        .wt-tab-actions {
+            display: flex;
+            flex: 0 0 auto;
+            flex-shrink: 0;
+            align-items: flex-end;
+            align-self: flex-end;
+            padding: 0 8px 6px 6px;
+            gap: 6px;
+        }
+        
+        .wt-menu-wrap {
+            position: relative;
+        }
+        
+        .wt-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 4px;
+            min-width: min(100vw - 24px, 420px);
+            max-width: calc(100vw - 24px);
+            background: var(--wt-dropdown-bg);
+            border: 1px solid var(--wt-dropdown-border);
+            border-radius: 6px;
+            box-shadow: var(--wt-dropdown-shadow);
+            z-index: 2000;
+            padding: 6px 0;
+        }
+        
+        .wt-dropdown.wt-open {
+            display: block;
+        }
+        
+        .wt-menu-item {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+            min-height: 44px;
+            padding: 10px 16px;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            font-size: calc(var(--wt-ui-font-base) * 1.0714);
+            color: var(--wt-menu-fg);
+            transition: background var(--wt-transition-fast), transform var(--wt-transition-fast);
+            border-radius: 4px;
+            margin: 0 6px;
+        }
+        
+        .wt-menu-item:hover,
+        .wt-menu-item:focus {
+            background: var(--wt-menu-hover);
+            outline: none;
+        }
+        
+        .wt-menu-item:active {
+            background: var(--wt-menu-active);
+            transform: scale(0.99);
+        }
+        
+        .wt-mi-ico {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .wt-mi-ico svg {
+            width: 22px;
+            height: 22px;
+            display: block;
+            opacity: 0.92;
+        }
+        
+        .wt-mi-label {
+            flex: 1;
+        }
+        
+        .wt-mi-key {
+            opacity: 0.6;
+            font-size: calc(var(--wt-ui-font-base) * 0.8571);
+            white-space: nowrap;
+        }
+        
+        .wt-menu-sep {
+            height: 1px;
+            background: var(--wt-menu-sep);
+            margin: 4px 8px;
+        }
+        
+        .wt-menu-hover-tip {
+            position: fixed;
+            z-index: 12000;
+            max-width: min(320px, calc(100vw - 24px));
+            padding: 10px 14px;
+            font-family: 'Segoe UI Variable', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            font-size: calc(var(--wt-ui-font-base) * 0.72);
+            line-height: 1.4;
+            color: #242424;
+            background: #f2f2f2;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+            pointer-events: none;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.12s ease, visibility 0.12s ease;
+        }
+        
+        .wt-menu-hover-tip.wt-tip-visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .wt-about-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 11000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: rgba(0, 0, 0, 0.48);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            box-sizing: border-box;
+        }
+        
+        .wt-about-overlay[hidden] {
+            display: none !important;
+        }
+        
+        .wt-about-dialog {
+            width: 100%;
+            max-width: 440px;
+            max-height: min(90vh, 560px);
+            overflow-y: auto;
+            background: #2b2b2b;
+            color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+            padding: 26px 28px 22px;
+            box-sizing: border-box;
+            outline: none;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .wt-about-dialog h2 {
+            margin: 0 0 16px;
+            font-size: calc(var(--wt-ui-font-base) * 1.28);
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+        
+        .wt-about-product {
+            margin: 0 0 6px;
+            font-size: calc(var(--wt-ui-font-base) * 0.95);
+        }
+        
+        .wt-about-version {
+            margin: 0 0 14px;
+            opacity: 0.92;
+            font-size: calc(var(--wt-ui-font-base) * 0.86);
+        }
+        
+        .wt-about-status {
+            margin: 0 0 20px;
+            font-size: calc(var(--wt-ui-font-base) * 0.86);
+            opacity: 0.88;
+            line-height: 1.45;
+        }
+        
+        .wt-about-links {
+            list-style: none;
+            margin: 0 0 24px;
+            padding: 0;
+        }
+        
+        .wt-about-links li {
+            margin: 0 0 10px;
+        }
+        
+        .wt-about-links a {
+            color: #70a5dc;
+            text-decoration: underline;
+            font-size: calc(var(--wt-ui-font-base) * 0.88);
+        }
+        
+        .wt-about-links a:active {
+            opacity: 0.85;
+        }
+        
+        .wt-about-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .wt-about-btn-secondary {
+            padding: 8px 18px;
+            border-radius: 4px;
+            border: none;
+            background: #3c3c3c;
+            color: #ffffff;
+            font-size: calc(var(--wt-ui-font-base) * 0.85);
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        .wt-about-btn-secondary:active {
+            filter: brightness(1.08);
+        }
+        
+        .wt-about-btn-primary {
+            padding: 8px 24px;
+            border-radius: 4px;
+            border: none;
+            background: #76b9ed;
+            color: #000000;
+            font-weight: 600;
+            font-size: calc(var(--wt-ui-font-base) * 0.85);
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        .wt-about-btn-primary:active {
+            filter: brightness(0.95);
+        }
+        
+        .wt-btn-icon {
+            width: 34px;
+            min-width: 34px;
+            height: 34px;
+            border: 1px solid transparent;
+            background: var(--wt-btn-icon-bg);
+            color: var(--wt-btn-icon-fg);
+            cursor: default;
+            border-radius: 4px;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background var(--wt-transition-fast), border-color var(--wt-transition-fast), transform var(--wt-transition-fast), box-shadow var(--wt-transition-fast);
+            box-shadow: var(--wt-btn-icon-inset);
+        }
+        
+        .wt-btn-icon svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+            opacity: 0.88;
+        }
+        
+        .wt-btn-icon:hover {
+            background: var(--wt-btn-icon-hover-bg);
+            border-color: var(--wt-btn-icon-hover-border);
+        }
+        
+        .wt-btn-icon:active {
+            background: var(--wt-press-bg);
+            transform: scale(0.97);
+        }
+        /* 设置页内布局（侧栏 + 主区域），嵌入标签时使用 */
+        
+        .wt-settings-body {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: row;
+        }
+        
+        .wt-settings-nav {
+            flex: 0 0 232px;
+            background: var(--wt-settings-nav-bg);
+            border-right: 1px solid var(--wt-settings-nav-border);
+            overflow-y: auto;
+            padding: 12px 0 20px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--wt-settings-nav-thumb) var(--wt-settings-nav-scroll-track);
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .wt-settings-nav::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .wt-settings-nav::-webkit-scrollbar-thumb {
+            background: var(--wt-settings-nav-thumb);
+            border-radius: 4px;
+            min-height: 32px;
+        }
+        
+        .wt-set-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            font-size: var(--wt-ui-font-base);
+            color: var(--wt-set-nav-fg);
+            cursor: default;
+            border-left: 3px solid transparent;
+            transition: background var(--wt-transition-fast), color var(--wt-transition-fast);
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .wt-set-nav-item:active {
+            background: var(--wt-set-nav-press);
+        }
+        
+        .wt-set-nav-item.wt-set-nav-active {
+            color: var(--wt-set-nav-active-fg);
+            background: var(--wt-set-nav-active-bg);
+            border-left-color: var(--wt-accent-blue);
+        }
+        
+        .wt-set-nav-ico {
+            width: 20px;
+            height: 20px;
+            opacity: 0.85;
+            flex-shrink: 0;
+        }
+        
+        .wt-set-nav-ico svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+        
+        .wt-settings-main {
+            flex: 1;
+            min-width: 0;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 0;
+            background: var(--wt-settings-main-bg);
+        }
+        
+        .wt-settings-pages-scroll {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 24px 32px 32px;
+            scrollbar-width: auto;
+            scrollbar-color: var(--wt-settings-pages-scroll-fg) var(--wt-settings-pages-scroll-bg);
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .wt-settings-pages-scroll::-webkit-scrollbar {
+            width: 12px;
+        }
+        
+        .wt-settings-pages-scroll::-webkit-scrollbar-thumb {
+            background: var(--wt-settings-pages-thumb);
+            border-radius: 6px;
+            border: 2px solid var(--wt-settings-pages-thumb-border);
+            min-height: 40px;
+        }
+        
+        .wt-settings-footer {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-top: 1px solid var(--wt-settings-footer-border);
+            background: var(--wt-settings-footer-bg);
+        }
+        
+        .wt-set-page-desc {
+            margin: 0 0 20px;
+            font-size: calc(var(--wt-ui-font-base) * 0.9286);
+            color: var(--wt-set-page-desc);
+            line-height: 1.5;
+            max-width: 720px;
+        }
+        
+        .wt-color-scheme-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .wt-color-scheme-card {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 16px;
+            width: 100%;
+            margin: 0;
+            font: inherit;
+            text-align: left;
+            padding: 14px 16px;
+            border: 1px solid var(--wt-color-scheme-card-border);
+            border-radius: 8px;
+            background: var(--wt-color-scheme-card-bg);
+            color: var(--wt-color-scheme-card-fg);
+            cursor: pointer;
+            transition: background var(--wt-transition-fast), border-color var(--wt-transition-fast);
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+        }
+        
+        .wt-color-scheme-card:hover {
+            background: var(--wt-color-scheme-card-hover);
+        }
+        
+        .wt-color-scheme-card.wt-color-scheme-card-active {
+            border-color: var(--wt-accent-blue);
+            background: var(--wt-color-scheme-active-bg);
+            box-shadow: 0 0 0 1px var(--wt-color-scheme-active-shadow);
+        }
+        
+        .wt-color-swatch-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 10px);
+            grid-template-rows: repeat(2, 10px);
+            gap: 2px;
+            flex-shrink: 0;
+        }
+        
+        .wt-color-swatch-grid span {
+            display: block;
+            border-radius: 2px;
+            box-shadow: inset 0 0 0 1px var(--wt-swatch-outline);
+        }
+        
+        .wt-color-card-text h3 {
+            margin: 0 0 4px;
+            font-size: calc(var(--wt-ui-font-base) * 1.0714);
+            font-weight: 600;
+            color: inherit;
+        }
+        
+        .wt-color-card-text p {
+            margin: 0;
+            font-size: calc(var(--wt-ui-font-base) * 0.8571);
+            color: var(--wt-color-card-p);
+            line-height: 1.35;
+            max-width: 400px;
+        }
+        
+        .wt-set-page {
+            display: none;
+        }
+        
+        .wt-set-page.wt-set-page-active {
+            display: block;
+        }
+        
+        .wt-set-page-title {
+            font-size: calc(var(--wt-ui-font-base) * 1.9);
+            font-weight: 600;
+            margin: 0 0 10px;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+            color: var(--wt-set-page-title);
+        }
+        
+        .wt-set-page-hero-desc {
+            margin: 0 0 28px;
+            font-size: calc(var(--wt-ui-font-base) * 0.9286);
+            color: var(--wt-set-page-desc);
+            line-height: 1.5;
+            max-width: 720px;
+        }
+        
+        .wt-set-card {
+            background: var(--wt-set-card-bg);
+            border: 1px solid var(--wt-set-card-border);
+            border-radius: 4px;
+            padding: 16px 20px;
+            margin-bottom: 8px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px 24px;
+            min-height: 56px;
+            box-sizing: border-box;
+        }
+        
+        .wt-set-card-lead {
+            flex: 1;
+            min-width: 0;
+            padding-right: 8px;
+        }
+        
+        .wt-set-card-ctrl {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        
+        .wt-set-card h3 {
+            margin: 0 0 4px;
+            font-size: var(--wt-ui-font-base);
+            font-weight: 600;
+            color: var(--wt-set-card-h3);
+            line-height: 1.35;
+        }
+        
+        .wt-set-card p {
+            margin: 0;
+            font-size: calc(var(--wt-ui-font-base) * 0.8571);
+            line-height: 1.45;
+            color: var(--wt-set-card-p);
+            max-width: 520px;
+        }
+        
+        .wt-set-card-lead code {
+            font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+            font-size: 0.88em;
+            padding: 1px 5px;
+            border-radius: 3px;
+            background: rgba(127, 127, 127, 0.18);
+        }
+        
+        .wt-set-nav-section-label {
+            padding: 18px 18px 8px;
+            font-size: calc(var(--wt-ui-font-base) * 0.75);
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            color: var(--wt-set-page-desc);
+            text-transform: uppercase;
+        }
+        
+        .wt-set-nav-item.wt-set-nav-item--profile {
+            padding-left: 14px;
+        }
+        
+        .wt-set-breadcrumb {
+            margin: 0 0 8px;
+            font-size: calc(var(--wt-ui-font-base) * 0.8571);
+            color: var(--wt-set-page-desc);
+        }
+        
+        .wt-set-breadcrumb button {
+            font: inherit;
+            color: var(--wt-accent-blue);
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        
+        .wt-set-breadcrumb button:hover {
+            opacity: 0.88;
+        }
+        
+        .wt-set-sub-row {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            width: 100%;
+            margin: 0 0 10px;
+            padding: 16px 22px;
+            font: inherit;
+            text-align: left;
+            border: 1px solid var(--wt-set-card-border);
+            border-radius: 6px;
+            background: var(--wt-set-card-bg);
+            color: var(--wt-set-card-h3);
+            cursor: pointer;
+            box-sizing: border-box;
+            transition: background var(--wt-transition-fast);
+        }
+        
+        .wt-set-sub-row:hover {
+            background: var(--wt-color-scheme-card-hover);
+        }
+        
+        .wt-set-sub-row[disabled],
+        .wt-set-sub-row.wt-set-sub-row--disabled {
+            opacity: 0.55;
+            cursor: default;
+            pointer-events: none;
+        }
+        
+        .wt-set-sub-row .wt-set-sub-chevron {
+            opacity: 0.55;
+            font-size: 1.25em;
+            line-height: 1;
+        }
+        
+        .wt-set-page-h3 {
+            margin: 24px 0 12px;
+            font-size: calc(var(--wt-ui-font-base) * 1.05);
+            font-weight: 600;
+            color: var(--wt-set-card-h3);
+        }
+        
+        .wt-def-term-preview {
+            border: 1px solid var(--wt-set-card-border);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            max-width: 720px;
+        }
+        
+        .wt-def-term-preview-head {
+            padding: 6px 10px;
+            font-size: calc(var(--wt-ui-font-base) * 0.8);
+            color: var(--wt-set-page-desc);
+            background: rgba(127, 127, 127, 0.12);
+            border-bottom: 1px solid var(--wt-set-card-border);
+        }
+        
+        .wt-def-term-preview-body {
+            padding: 12px 14px;
+            min-height: 120px;
+            box-sizing: border-box;
+            white-space: pre-wrap;
+            word-break: break-all;
+            font-family: 'Cascadia Mono', monospace;
+            font-size: 14px;
+            line-height: 1.2;
+            background: #0c0c0c;
+            color: #ccc;
+        }
+        
+        .wt-set-range-row {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 12px;
+            min-width: 280px;
+            max-width: 360px;
+            justify-content: flex-end;
+        }
+        
+        .wt-set-range-row input[type="range"] {
+            flex: 1;
+            min-width: 120px;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 2px;
+        }
+        
+        html[data-wt-app-scheme="lightcream"] .wt-set-range-row input[type="range"] {
+            background: rgba(0, 0, 0, 0.12);
+        }
+        
+        .wt-set-range-row input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--wt-accent-blue);
+            border: 2px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+            cursor: default;
+        }
+        
+        .wt-set-range-row input[type="range"]::-webkit-slider-runnable-track {
+            height: 4px;
+            border-radius: 2px;
+            background: transparent;
+        }
+        
+        .wt-set-range-row input[type="range"]::-moz-range-track {
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.12);
+        }
+        
+        html[data-wt-app-scheme="lightcream"] .wt-set-range-row input[type="range"]::-moz-range-track {
+            background: rgba(0, 0, 0, 0.12);
+        }
+        
+        .wt-set-range-row input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--wt-accent-blue);
+            border: 2px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+            cursor: default;
+        }
+        
+        .wt-set-range-val {
+            min-width: 42px;
+            text-align: right;
+            font-size: calc(var(--wt-ui-font-base) * 0.8571);
+            color: var(--wt-set-card-p);
+        }
+        
+        .wt-set-input.wt-set-input-sm {
+            min-width: 72px;
+            max-width: 96px;
+        }
+        
+        .wt-def-show-all-fonts {
+            flex-shrink: 0;
+        }
+        
+        .wt-set-checkbox-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: calc(var(--wt-ui-font-base) * 0.9286);
+            color: var(--wt-set-select-fg);
+            cursor: default;
+        }
+        
+        .wt-term-pane-inner.wt-term-pane-acrylic {
+            backdrop-filter: blur(14px) saturate(1.2);
+            -webkit-backdrop-filter: blur(14px) saturate(1.2);
+        }
+        
+        .wt-set-readonly-value {
+            display: inline-block;
+            min-width: 220px;
+            max-width: 320px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid var(--wt-set-select-border);
+            background: var(--wt-set-select-bg);
+            color: var(--wt-set-card-p);
+            font-size: calc(var(--wt-ui-font-base) * 0.9286);
+            text-align: right;
+            box-sizing: border-box;
+        }
+        
+        .wt-set-select {
+            min-width: 280px;
+            max-width: 360px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid var(--wt-set-select-border);
+            background: var(--wt-set-select-bg);
+            color: var(--wt-set-select-fg);
+            font-size: calc(var(--wt-ui-font-base) * 0.9286);
+        }
+        
+        .wt-set-input {
+            min-width: 280px;
+            max-width: 360px;
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid var(--wt-set-select-border);
+            background: var(--wt-set-select-bg);
+            color: var(--wt-set-select-fg);
+            font-size: calc(var(--wt-ui-font-base) * 0.9286);
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+        
+        .wt-set-input.wt-set-input-mono {
+            font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+        }
+        
+        .wt-set-input.wt-set-input-url {
+            max-width: 420px;
+        }
+        
+        .wt-set-toggle {
+            width: 46px;
+            height: 24px;
+            border-radius: 12px;
+            background: var(--wt-toggle-track-off);
+            border: none;
+            position: relative;
+            flex-shrink: 0;
+            cursor: default;
+            transition: background var(--wt-transition-fast);
+        }
+        
+        .wt-set-toggle.wt-on {
+            background: var(--wt-accent-blue);
+        }
+        
+        .wt-set-toggle::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--wt-toggle-knob);
+            top: 3px;
+            left: 3px;
+            transition: transform var(--wt-transition-fast);
+            box-shadow: var(--wt-toggle-knob-shadow);
+        }
+        
+        .wt-set-toggle.wt-on::after {
+            transform: translateX(22px);
+        }
+        
+        .wt-settings-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid var(--wt-settings-actions-border);
+        }
+        
+        .wt-set-btn-primary {
+            padding: 8px 20px;
+            min-height: 34px;
+            border-radius: 4px;
+            border: none;
+            background: var(--wt-accent-blue);
+            color: var(--wt-set-btn-primary-fg);
+            font-weight: 600;
+            font-size: calc(var(--wt-ui-font-base) * 0.9);
+            font-family: inherit;
+            transition: filter var(--wt-transition-fast), transform var(--wt-transition-fast);
+        }
+        
+        .wt-set-btn-primary:active {
+            transform: scale(0.99);
+            filter: brightness(0.94);
+        }
+        
+        .wt-set-btn-secondary {
+            padding: 8px 20px;
+            min-height: 34px;
+            border-radius: 4px;
+            border: 1px solid var(--wt-set-btn-secondary-border);
+            background: var(--wt-set-btn-secondary-bg);
+            color: var(--wt-set-btn-secondary-fg);
+            font-size: calc(var(--wt-ui-font-base) * 0.9);
+            font-family: inherit;
+            transition: background var(--wt-transition-fast), transform var(--wt-transition-fast);
+        }
+        
+        .wt-set-btn-secondary:active {
+            transform: scale(0.98);
+            background: var(--wt-set-btn-secondary-active-bg);
+        }
+        
+        @media (max-width: 720px) {
+            .wt-set-card {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .wt-set-card-ctrl {
+                justify-content: stretch;
+            }
+            .wt-set-select,
+            .wt-set-readonly-value,
+            .wt-set-input {
+                max-width: none;
+                width: 100%;
+                min-width: 0;
+            }
+        }
+        /* 设置页作为标签内容时的容器（沿用 .wt-settings-body / .wt-settings-nav 等） */
+        
+        .wt-settings-pane.wt-term-pane {
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        .wt-settings-embed {
+            width: 100%;
+            height: 100%;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            background: var(--wt-settings-embed-bg);
+            box-sizing: border-box;
+        }
+        
+        .wt-settings-embed>.wt-settings-body {
+            flex: 1;
+            min-height: 0;
+        }
+        
+        #terminal-stack {
+            flex: 1 1 auto;
+            min-height: 0;
+            width: 100%;
+            position: relative;
+            background-color: var(--wt-canvas);
+            overflow: hidden;
+        }
+        
+        .wt-term-pane {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            padding: 8px 10px 10px 10px;
+            box-sizing: border-box;
+            display: none;
+            overflow: hidden;
+        }
+        
+        .wt-term-pane.wt-pane-visible {
+            display: block;
+        }
+        /* Shell 标签：左侧 xterm + 右侧自定义滚动条（WebView 常不画原生条/canvas 吃掉触摸） */
+        
+        .wt-term-pane-inner {
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            width: 100%;
+            height: 100%;
+            min-height: 0;
+            box-sizing: border-box;
+        }
+        
+        .wt-xterm-anchor {
+            flex: 1 1 auto;
+            min-width: 0;
+            min-height: 0;
+            position: relative;
+        }
+        
+        .wt-term-scroll-rail {
+            flex: 0 0 24px;
+            width: 24px;
+            min-width: 24px;
+            background: var(--wt-term-rail-bg);
+            border-left: 1px solid var(--wt-term-rail-border);
+            box-sizing: border-box;
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
+            z-index: 6;
+        }
+        
+        .wt-term-scroll-track {
+            position: relative;
+            height: 100%;
+            width: 100%;
+            padding: 0 3px;
+            box-sizing: border-box;
+        }
+        
+        .wt-term-scroll-thumb {
+            position: absolute;
+            left: 2px;
+            right: 2px;
+            top: 0;
+            min-height: 40px;
+            height: 48px;
+            border-radius: 8px;
+            background: var(--wt-term-scroll-thumb);
+            box-shadow: var(--wt-term-scroll-thumb-inset);
+            touch-action: none;
+            -webkit-tap-highlight-color: transparent;
+            cursor: grab;
+        }
+        
+        .wt-term-scroll-thumb:active {
+            cursor: grabbing;
+            background: var(--wt-term-scroll-thumb-active);
+        }
+        
+        .wt-term-scroll-thumb.wt-thumb-idle {
+            opacity: 0.45;
+        }
+        
+        .xterm {
+            height: 100%;
+            max-height: 100%;
+            overflow: hidden;
+        }
+        /* 使用右侧 wt-term-scroll-*，此处隐藏原生条避免双轨 */
+        
+        .xterm .xterm-viewport {
+            overflow-y: scroll !important;
+            overflow-x: hidden !important;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        
+        .xterm .xterm-viewport::-webkit-scrollbar {
+            width: 0 !important;
+            height: 0 !important;
+            display: none;
+        }
+        
+        @media (max-width: 600px) {
+            .wt-settings-nav {
+                flex: 0 0 64px;
+            }
+            .wt-set-nav-item span:last-child {
+                display: none;
+            }
+            .wt-set-nav-item {
+                justify-content: center;
+                padding: 12px 8px;
+            }
+            .wt-set-card {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="wt-root">
+        <header id="wt-tabbar">
+            <div id="wt-tabbar-leading">
+                <div id="wt-tabs-strip"></div>
+                <div class="wt-tab-actions">
+                    <button type="button" class="wt-btn-icon" id="wt-btn-new-tab" title="新建标签页（与当前 Shell 同配置；在「设置」标签上点击不新建）" aria-label="新建标签页">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg>
+                    </button>
+                    <div class="wt-menu-wrap">
+                        <button type="button" class="wt-btn-icon" id="wt-btn-menu" title="配置与配置文件" aria-label="打开菜单">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5H7z"/></svg>
+                        </button>
+                        <div id="wt-dropdown" class="wt-dropdown" role="menu">
+                            <div class="wt-menu-item" data-profile="daemon" data-title="管理员：Powershell" title="经 kh_term_daemon 连接抽象套接字；标签显示为「管理员：Powershell」" role="menuitem" tabindex="0">
+                                <span class="wt-mi-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="#ffb74d" d="M12 2L4 9v13h16V9l-8-7zm0 15a2 2 0 112.001 3.999A2 2 0 0112 17z"/><path fill="#fff" opacity="0.9" d="M12 13a1 1 0 011 1 1 1 0 01-2 0 1 1 0 011-1z"/></svg></span>
+                                <span class="wt-mi-label">管理员：Powershell</span>
+                                <span class="wt-mi-key">Ctrl+Shift+3</span>
+                            </div>
+                            <div class="wt-menu-sep"></div>
+                            <div class="wt-menu-item" data-profile="powershell" data-title="PowerShell" title="与「PowerShell（默认 sh）」相同底层；显示名称统一为 PowerShell" role="menuitem" tabindex="0">
+                                <span class="wt-mi-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="#5eb0ff" d="M4 5h16v14H4V5zm2 2v10h12V7H6zm2 2h8v2H8V9zm0 3h5v2H8v-2z"/><path fill="#fff" d="M9 14l2-1.5L9 11v3z" opacity="0.9"/></svg></span>
+                                <span class="wt-mi-label">PowerShell</span>
+                                <span class="wt-mi-key">Ctrl+Shift+1</span>
+                            </div>
+                            <div class="wt-menu-item" data-profile="khsl" data-title="KHSL" role="menuitem" tabindex="0">
+                                <span class="wt-mi-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><defs><linearGradient id="khgsl" x1="3" y1="3" x2="21" y2="21"><stop stop-color="#b388ff"/><stop offset="1" stop-color="#536dfe"/></linearGradient></defs><rect x="3" y="3" width="18" height="18" rx="4" fill="url(#khgsl)"/><path fill="#fff" d="M8 8h2v8H8V8zm3.2 0h2.2L16 12l-2.6 4h-2.2l2.3-4-2.3-4z"/></svg></span>
+                                <span class="wt-mi-label">KHSL</span>
+                                <span class="wt-mi-key">Ctrl+Shift+2</span>
+                            </div>
+                            <div class="wt-menu-sep"></div>
+                            <div class="wt-menu-item" id="wt-menu-settings" data-action="settings" role="menuitem" tabindex="0">
+                                <span class="wt-mi-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="#cfd8dc" d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5zm7.43-2.53c.04-.32.07-.64.07-.97s-.03-.66-.07-1l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65A.506.506 0 0 0 14 2h-4c-.25 0-.46.18-.5.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.34-.07.67-.07 1s.02.65.07.97l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.04.24.25.42.5.42h4c.25 0 .46-.18.5-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65z"/></svg></span>
+                                <span class="wt-mi-label">设置</span>
+                                <span class="wt-mi-key">Ctrl+,</span>
+                            </div>
+                            <div class="wt-menu-sep"></div>
+                            <div class="wt-menu-item" id="wt-menu-about" data-action="about" data-wt-tooltip="打开包含产品信息的对话框" role="menuitem" tabindex="0">
+                                <span class="wt-mi-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c-2.76 0-5 2.24-5 5h2c0-1.66 1.34-3 3-3s3 1.34 3 3c0 1-1 2-2 2v3h2v-1.17c1.17-.41 2-1.52 2-2.83 0-2.21-1.79-4-4-4z"/></svg></span>
+                                <span class="wt-mi-label">关于</span>
+                                <span class="wt-mi-key">Ctrl+Shift+P</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="wt-tabbar-spacer" aria-hidden="true"></div>
+            <div class="wt-window-controls">
+                <button type="button" class="wt-window-btn wt-window-min" id="wt-btn-min" title="最小化" aria-label="最小化">
+                    <svg viewBox="0 0 10 10"><path d="M0,4h10v1H0V4z"/></svg>
+                </button>
+                <button type="button" class="wt-window-btn wt-window-max" id="wt-btn-max" title="最大化" aria-label="最大化">
+                    <svg viewBox="0 0 10 10"><path d="M0,0v10h10V0H0z M9,9H1V1h8V9z"/></svg>
+                </button>
+                <button type="button" class="wt-window-btn wt-window-close" id="wt-btn-close" title="关闭" aria-label="关闭">
+                    <svg viewBox="0 0 10 10"><path d="M10.2,1.2l-1.4-1.4L5,3.6L1.2-0.2L-0.2,1.2L3.6,5l-3.8,3.8l1.4,1.4L5,6.4l3.8,3.8l1.4-1.4L6.4,5L10.2,1.2z"/></svg>
+                </button>
+            </div>
+        </header>
+        <div id="terminal-stack"></div>
+        <div id="wt-menu-hover-tip" class="wt-menu-hover-tip" role="tooltip" aria-hidden="true"></div>
+        <div id="wt-about-overlay" class="wt-about-overlay" hidden aria-hidden="true">
+            <div class="wt-about-dialog" role="dialog" aria-modal="true" aria-labelledby="wt-about-title" tabindex="-1">
+                <h2 id="wt-about-title">关于</h2>
+                <p class="wt-about-product">KH Terminal（KaihongOS Web 终端示例）</p>
+                <p class="wt-about-version">版本：<span id="wt-about-version-val">0.1.0</span></p>
+                <p class="wt-about-status">演示构建：未连接在线更新服务。界面与交互参考 Windows Terminal。</p>
+                <ul class="wt-about-links" id="wt-about-links">
+                    <li><a href="https://github.com/xtermjs/xterm.js" target="_blank" rel="noopener noreferrer">xterm.js（终端渲染）</a></li>
+                    <li><a href="https://learn.microsoft.com/zh-cn/windows/terminal/" target="_blank" rel="noopener noreferrer">Windows Terminal 文档</a></li>
+                    <li><a href="https://github.com/microsoft/terminal/releases" target="_blank" rel="noopener noreferrer">发行说明（参考）</a></li>
+                    <li><a href="https://privacy.microsoft.com/zh-cn/privacystatement" target="_blank" rel="noopener noreferrer">隐私政策（Microsoft）</a></li>
+                    <li><a href="https://thirdpartysource.microsoft.com/" target="_blank" rel="noopener noreferrer">第三方声明（Microsoft）</a></li>
+                </ul>
+                <div class="wt-about-actions">
+                    <button type="button" class="wt-about-btn-secondary" id="wt-about-btn-feedback">发送反馈</button>
+                    <button type="button" class="wt-about-btn-primary" id="wt-about-btn-ok">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <template id="wt-settings-template">
+        <div class="wt-settings-embed">
+            <div class="wt-settings-body">
+                <nav class="wt-settings-nav" aria-label="设置类别">
+                    <div class="wt-set-nav-item wt-set-nav-active" data-page="startup" role="button" tabindex="0">
+                        <span class="wt-set-nav-ico"><svg viewBox="0 0 24 24"><path d="M4 3h16v4H4V3zm0 6h10v12H4V9zm12 0h4v12h-4V9z"/></svg></span>
+                        <span>启动</span>
+                    </div>
+                    <div class="wt-set-nav-item" data-page="interaction" role="button" tabindex="0">
+                        <span class="wt-set-nav-ico"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h7v8l11-12h-8V2z"/></svg></span>
+                        <span>交互</span>
+                    </div>
+                    <div class="wt-set-nav-item" data-page="appearance" role="button" tabindex="0">
+                        <span class="wt-set-nav-ico"><svg viewBox="0 0 24 24"><path d="M12 3c-5 0-9 4-9 9s4 9 9 9c.8 0 1.5-.1 2.2-.3 1.2 1.3 3 2.3 5 2.3-.6-1.7-1-3.5-1-5.3 3.4-2.1 5.8-5.9 5.8-10.1 0-5-4-9-9-9zm0 16c-3.9 0-7-3.1-7-7s3.1-7 7-7 7 3.1 7 7-3.1 7-7 7z"/></svg></span>
+                        <span>外观</span>
+                    </div>
+                    <div class="wt-set-nav-item" data-page="color" role="button" tabindex="0">
+                        <span class="wt-set-nav-ico"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18 1 1 0 0 0 0-3 6 6 0 0 1 6-6 1 1 0 0 0 3 0c0-5-4-9-9-9zM6.5 10a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm3-3a1.5 1.5 0 110 3 1.5 1.5 0 010-3 3 3 0 0 1 3 3 1.5 1.5 0 1 1-3 0z"/></svg></span>
+                        <span>配色方案</span>
+                    </div>
+                    <div class="wt-set-nav-item" data-page="rendering" role="button" tabindex="0">
+                        <span class="wt-set-nav-ico"><svg viewBox="0 0 24 24"><path d="M4 3h16v4H4V3zm2 2v1h12V5H6zm-2 5h16v9H4V10zm2 2v5h12v-5H6zm2 11h8v2H8v-2z"/></svg></span>
+                        <span>呈现</span>
+                    </div>
+                    <div class="wt-set-nav-item" data-page="compatibility" role="button" tabindex="0">
+                        <span class="wt-set-nav-ico"><svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 0 0-2 2v14l4-4h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 12H7l-2 2V5h14v10zM9 7h6v2H9V7zm0 4h6v2H9v-2z"/></svg></span>
+                        <span>兼容性</span>
+                    </div>
+                    <div class="wt-set-nav-item" data-page="actions" role="button" tabindex="0">
+                        <span class="wt-set-nav-ico"><svg viewBox="0 0 24 24"><path d="M20 5H4v2h16V5zm0 6H4v2h10v2H8v2h8v-4h4v-2zm-8 8H4v2h8v-2z"/></svg></span>
+                        <span>操作</span>
+                    </div>
+                    <div class="wt-set-nav-item" data-page="newTabMenu" role="button" tabindex="0">
+                        <span class="wt-set-nav-ico"><svg viewBox="0 0 24 24"><path d="M4 6h16v2H4V6zm0 5h10v2H4v-2zm0 5h16v2H4v-2z"/></svg></span>
+                        <span>新选项卡菜单</span>
+                    </div>
+                    <div class="wt-set-nav-item" data-page="extensions" role="button" tabindex="0">
+                        <span class="wt-set-nav-ico"><svg viewBox="0 0 24 24"><path d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h6v6h-6v-6z"/></svg></span>
+                        <span>扩展</span>
+                    </div>
+                    <div class="wt-set-nav-section-label" role="separator">配置文件</div>
+                    <div class="wt-set-nav-item wt-set-nav-item--profile" data-page="profileDefaults" role="button" tabindex="0">
+                        <span class="wt-set-nav-ico"><svg viewBox="0 0 24 24"><path d="M12 12c2.2 0 4-1.8 4-4s-1.8-4-4-4-4 1.8-4 4 1.8 4 4 4zm0 2c-2.7 0-8 1.3-8 4v2h16v-2c0-2.7-5.3-4-8-4z"/></svg></span>
+                        <span>默认值</span>
+                    </div>
+                </nav>
+                <div class="wt-settings-main">
+                    <div class="wt-settings-pages-scroll">
+                        <section class="wt-set-page wt-set-page-active" data-page="startup">
+                            <h1 class="wt-set-page-title">启动</h1>
+                            <p class="wt-set-page-hero-desc">配置默认配置文件与启动行为。版式对齐 Windows Terminal「设置 → 启动」；部分项受 KaihongOS 集成限制，仅作只读说明。</p>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>默认配置文件</h3>
+                                    <p>单击「+」图标或从下拉菜单新建标签时打开的配置文件。与顶部「配置文件」菜单中的选项一致。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <select class="wt-set-select wt-set-default-profile" aria-label="默认配置文件">
+                                        <option value="daemon">管理员：Powershell</option>
+                                        <option value="powershell">PowerShell</option>
+                                        <option value="khsl">KHSL</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>默认终端应用程序</h3>
+                                    <p>系统将命令行会话交给哪个终端应用。本页为应用内终端；系统级「默认终端」委托由集成与策略决定。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <span class="wt-set-readonly-value" title="只读说明">KH 终端（本应用）</span>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>在设备启动时打开</h3>
+                                    <p>对应 Windows Terminal「在计算机启动时启动」：登录或设备就绪后是否由系统自动打开本终端。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-set-boot-toggle" aria-pressed="false" title="开关"></button>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>在终端启动时</h3>
+                                    <p>冷启动或重新进入本应用时，第一个标签应呈现的内容。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <select class="wt-set-select wt-set-startup-mode" aria-label="在终端启动时">
+                                        <option value="0">打开具有默认配置文件的选项卡</option>
+                                        <option value="1">恢复上一个会话</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>新建实例行为</h3>
+                                    <p>新会话如何挂接到窗口。当前为单窗口多标签，新实例在本窗口内新建标签。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <span class="wt-set-readonly-value">在当前窗口中新建标签</span>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>启动大小</h3>
+                                    <p>首次布局时 Shell 的行列（字符网格）。数值随窗口与字体自动计算。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <span class="wt-set-readonly-value">默认，随窗口与字号</span>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>启动参数</h3>
+                                    <p>进程级启动参数由系统与 Ability 配置决定。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <span class="wt-set-readonly-value">系统默认</span>
+                                </div>
+                            </div>
+                        </section>
+                        <section class="wt-set-page" data-page="interaction">
+                            <h1 class="wt-set-page-title">交互</h1>
+                            <p class="wt-set-page-hero-desc">控制复制与粘贴、指针与滚动、URL 与搜索等行为；与 Windows Terminal「设置 → 交互」对应。部分选项在 Web / xterm 中仅持久化，或将在后续版本接通。</p>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>自动将所选内容复制到剪贴板</h3>
+                                    <p>选中终端文本后是否同步到系统剪贴板（取决于浏览器与 WebView 能力；当前为偏好占位）。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-set-auto-copy" aria-pressed="true" title="开关"></button>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>要复制到剪贴板的文本格式</h3>
+                                    <p>与上一项配合：以纯文本或 HTML 复制（HTML 需环境支持 rich clipboard）。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <select class="wt-set-select wt-set-copy-format" aria-label="复制格式">
+                                        <option value="plain">纯文本</option>
+                                        <option value="html">HTML</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>矩形选中复制时删除行尾空格</h3>
+                                    <p>使用块选复制时是否修剪每行尾部空白（偏好项，复制管线接通后生效）。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-set-rect-trim" aria-pressed="true" title="开关"></button>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>粘贴时删除尾随空格</h3>
+                                    <p>从剪贴板粘贴到终端时是否去掉行尾空格。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-set-paste-trim" aria-pressed="true" title="开关"></button>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>单词分隔符</h3>
+                                    <p>在双击选词或扩展选区时视为「词界」的字符，已接入 xterm <code>wordSeparator</code>。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <input type="text" class="wt-set-input wt-set-input-mono wt-set-word-sep" autocomplete="off" spellcheck="false" aria-label="单词分隔符">
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>将窗口大小调整为字符网格对齐</h3>
+                                    <p>关闭时窗口可平滑缩放。内嵌单窗口 Web 终端主要随宿主布局；此项为偏好占位。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-set-snap-grid" aria-pressed="true" title="开关"></button>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>选项卡切换界面样式</h3>
+                                    <p>使用键盘切换标签时的顺序策略（当前仅「按选项卡顺序」；最近使用顺序可预留）。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <select class="wt-set-select wt-set-tab-switch-style" aria-label="选项卡切换样式">
+                                        <option value="order">独立窗口，按选项卡显示顺序切换</option>
+                                        <option value="mru">按最近使用顺序切换</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>鼠标悬停时自动聚焦窗格</h3>
+                                    <p>指针移入终端区域时自动将键盘焦点交给 xterm。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-set-focus-hover" aria-pressed="false" title="开关"></button>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>按住 Ctrl 键时通过滚动调整终端字体大小</h3>
+                                    <p>在 Shell 区域按住 Ctrl 并滚动滚轮，在 14 / 18 / 22 档间切换字号（与外观页联动）。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-set-ctrl-scroll-font" aria-pressed="true" title="开关"></button>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>按住 Ctrl 和 Shift 键的同时滚动来调整终端不透明度</h3>
+                                    <p>对应 Windows Terminal 行为；当前为偏好占位，未改 ArkUI 窗口透明度。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-set-ctrl-shift-opacity" aria-pressed="true" title="开关"></button>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>自动检测 URL 并使其可单击</h3>
+                                    <p>需 xterm 链接能力；当前为偏好占位。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-set-detect-urls" aria-pressed="true" title="开关"></button>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>用于「搜索 Web」操作的默认 URL</h3>
+                                    <p>占位符「%s」将替换为搜索词（供后续快捷键或上下文菜单使用）。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <input type="text" class="wt-set-input wt-set-input-url wt-set-search-web-url" autocomplete="off" spellcheck="false" aria-label="搜索 Web URL">
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>实验性：将键绑定添加到所选文本的颜色</h3>
+                                    <p>用于高亮与所选文本相同颜色的实例等实验功能。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-set-exp-selection-color" aria-pressed="false" title="开关"></button>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>有新输出时自动滚动到底部</h3>
+                                    <p>视口在底部附近时随输出自动下滚（xterm scrollOnUserInput）。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-set-auto-scroll" aria-pressed="true" title="自动滚动"></button>
+                                </div>
+                            </div>
+                        </section>
+                        <section class="wt-set-page" data-page="appearance">
+                            <h1 class="wt-set-page-title">外观</h1>
+                            <p class="wt-set-page-hero-desc">控制应用主题、标签栏与动画等；与 Windows Terminal「设置 → 外观」对齐。宿主窗口（标题栏、置顶、托盘、全屏）由 KaihongOS / ArkUI 管理，Web 内仅作说明或偏好占位。</p>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>应用程序主题</h3>
+                                    <p>控制设置窗体等界面深浅：浅色类终端方案（乳白浅彩、One Half Light、Solarized Light、Tango Light、VS Code Light Modern）会自动使用浅色界面；其余为深色。下拉可快速切换为 Campbell（深色）或乳白浅彩。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <select class="wt-set-select wt-set-app-theme" aria-label="应用程序主题">
+                                        <option value="dark">深色</option>
+                                        <option value="lightcream">浅色</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>新建选项卡的位置</h3>
+                                    <p>新建 Shell 标签在标签栏中插入的位置（设置标签仍追加在末尾）。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <select class="wt-set-select wt-set-new-tab-position" aria-label="新建选项卡位置">
+                                        <option value="last">最后一个选项卡之后</option>
+                                        <option value="after_current">当前选项卡之后</option>
+                                        <option value="first">第一个选项卡之前</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>隐藏标题栏</h3>
+                                    <p>由宿主窗口提供；关闭时系统标题栏会显示在标签上方（需重启生效为系统行为）。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <span class="wt-set-readonly-value" title="由宿主管理">由宿主窗口决定</span>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>始终显示选项卡</h3>
+                                    <p>关闭时仅隐藏标签条区域（保留右侧「+」与菜单）；单标签时仍可通过菜单操作。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-set-always-show-tabs" aria-pressed="true" title="开关"></button>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>全屏显示选项卡</h3>
+                                    <p>全屏模式下是否显示标签栏。实际全屏由宿主窗口控制，此项为偏好占位。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-set-show-tabs-fullscreen" aria-pressed="false" title="开关"></button>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>在选项卡行中使用亚克力材料</h3>
+                                    <p>为标签栏启用毛玻璃背景（Web 层视觉效果）。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-set-tab-acrylic" aria-pressed="false" title="开关"></button>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>使用活动终端标题作为应用程序标题</h3>
+                                    <p>标题同步依赖原生桥接；当前为偏好占位。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-set-active-title-app" aria-pressed="true" title="开关"></button>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>置于顶层</h3>
+                                    <p>由系统窗口管理；此项仅持久化偏好。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-set-always-on-top" aria-pressed="false" title="开关"></button>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>选项卡宽度</h3>
+                                    <p>紧凑模式下非活动标签可收窄并以图标为主。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <select class="wt-set-select wt-set-tab-width-style" aria-label="选项卡宽度">
+                                        <option value="equal">等宽</option>
+                                        <option value="compact">紧凑</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>窗格动画</h3>
+                                    <p>标签与终端区域过渡动画。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-set-pane-animations" aria-pressed="true" title="开关"></button>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>始终在通知区域中显示图标</h3>
+                                    <p>由宿主 Ability 与系统策略决定。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-set-tray-icon" aria-pressed="false" title="开关"></button>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>最小化时在通知区域隐藏终端</h3>
+                                    <p>宿主行为；偏好占位。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-set-tray-hide-min" aria-pressed="false" title="开关"></button>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>自动隐藏窗口</h3>
+                                    <p>切换应用时隐藏窗口（系统级）。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-set-auto-hide-win" aria-pressed="false" title="开关"></button>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>字体大小</h3>
+                                    <p>立即应用到所有 Shell；保存后新建标签继承。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <select class="wt-set-select wt-set-font-size-select" aria-label="字体大小">
+                                        <option value="22">大（22）</option>
+                                        <option value="18">中（18）</option>
+                                        <option value="14">小（14）</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </section>
+                        <section class="wt-set-page" data-page="color">
+                            <h1 class="wt-set-page-title">配色方案</h1>
+                            <p class="wt-set-page-hero-desc">此处方案对应终端 16 色与背景，与 Windows Terminal「配色方案」页一致：可应用于本应用内所有 Shell。自定义导入将后续支持。</p>
+                            <div class="wt-color-scheme-toolbar">
+                                <span style="font-size:calc(var(--wt-ui-font-base) * 0.9286);color:var(--wt-set-page-desc);">选择下方一行以切换主题。</span>
+                                <button type="button" class="wt-color-scheme-add" disabled title="即将支持自定义导入">+ 新增</button>
+                            </div>
+                            <div class="wt-color-scheme-list wt-color-scheme-list--vertical"></div>
+                        </section>
+                        <section class="wt-set-page" data-page="rendering">
+                            <h1 class="wt-set-page-title">呈现</h1>
+                            <p class="wt-set-page-hero-desc">图形与文本光栅化相关选项，对齐 Windows Terminal「呈现」页。xterm 在 Canvas 中绘制；下列 DirectX 项仅作偏好占位或后续原生层桥接。</p>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>图形 API</h3>
+                                    <p>Windows Terminal 中在 D3D11 / D2D / 自动间选择。Web 终端始终使用浏览器 Canvas；此处记录偏好。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <select class="wt-set-select wt-set-graphics-api" aria-label="图形 API">
+                                        <option value="auto">自动</option>
+                                        <option value="d3d11">Direct3D 11</option>
+                                        <option value="d2d">Direct2D</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>禁用部分交换链失效</h3>
+                                    <p>与 FLIP 交换链及脏矩形相关的高级选项；宿主 GPU 合成层使用。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-set-disable-partial-swap" aria-pressed="false" title="开关"></button>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>使用软件渲染 (WARP)</h3>
+                                    <p>强制软件光栅；几乎在所有情况下应保持关闭。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-set-software-warp" aria-pressed="false" title="开关"></button>
+                                </div>
+                            </div>
+                        </section>
+                        <section class="wt-set-page" data-page="compatibility">
+                            <h1 class="wt-set-page-title">兼容性</h1>
+                            <p class="wt-set-page-hero-desc">与 Windows Terminal「兼容性」页版式一致。后台运行、文本度量依赖宿主与 xterm；清除缓存与重置将影响本机 Web 存储中的终端数据。</p>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>允许应用在后台运行</h3>
+                                    <p>启用后，全局唤起、类 Quake 模式等可在无前台窗口时工作。当前由 KaihongOS / Ability 生命周期决定；此处为偏好占位供后续桥接。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-set-allow-background" aria-pressed="false" title="开关"></button>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>文本度量模式</h3>
+                                    <p>控制宽字符与簇边界如何映射到单元格。「Grapheme 群集」对应 xterm Unicode 11 度量；「wcswidth」与「Windows 控制台」为兼容/传统模式。更改后需重新打开终端会话以完全生效。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <select class="wt-set-select wt-set-text-measure-mode" aria-label="文本度量模式">
+                                        <option value="grapheme">Grapheme 群集</option>
+                                        <option value="wcswidth">wcswidth</option>
+                                        <option value="wincon">Windows 控制台</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>清除缓存</h3>
+                                    <p>删除除当前「已保存设置」以外的 <code>kh_terminal_*</code> 本地存储项，并尝试调用原生 <code>clearWebCache</code>（若存在）。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-btn-danger wt-set-clear-cache-btn">清除</button>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>重置为默认设置</h3>
+                                    <p>将所有偏好恢复为内置默认值并立即保存；不会卸载应用。与 Windows Terminal「重置」行为类似。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-btn-danger wt-set-reset-prefs-btn">重置</button>
+                                </div>
+                            </div>
+                        </section>
+                        <section class="wt-set-page" data-page="actions">
+                            <h1 class="wt-set-page-title">操作</h1>
+                            <p class="wt-set-page-hero-desc">与 Windows Terminal「操作」页一致：默认键位参考表（只读）。键名采用小写 <code>ctrl</code>/<code>shift</code>/<code>alt</code> 形式。多项可绑定同一操作。本应用在 xterm 聚焦时通过捕获阶段拦截部分组合，避免输入进入 Shell。</p>
+                            <div class="wt-actions-toolbar">
+                                <span class="wt-actions-toolbar-hint">列表与「保存」同步刷新；「+ 新增」自定义键位即将支持。</span>
+                                <button type="button" class="wt-actions-add-btn" disabled title="即将支持">+ 新增</button>
+                            </div>
+                            <div class="wt-actions-list" role="list" aria-label="快捷键列表"></div>
+                        </section>
+                        <section class="wt-set-page" data-page="newTabMenu">
+                            <h1 class="wt-set-page-title">新选项卡菜单</h1>
+                            <p class="wt-set-page-hero-desc">自定义点击「+」旁下拉菜单时的条目顺序与分组（版式对齐 Windows Terminal）。当前顶部菜单 HTML 为静态模板；下列配置会保存到偏好，将在后续版本与运行时菜单同步。</p>
+                            <div class="wt-ntm-list-wrap" aria-label="菜单结构">
+                                <div class="wt-ntm-list-head">
+                                    <span></span>
+                                    <span>条目</span>
+                                    <span style="width:108px;text-align:right">操作</span>
+                                </div>
+                                <div class="wt-ntm-list-body"></div>
+                            </div>
+                            <div class="wt-ntm-bulk">
+                                <button type="button" disabled title="即将支持">将所选条目移动到文件夹…</button>
+                                <button type="button" disabled title="请选择条目">删除所选条目</button>
+                            </div>
+                            <h2 class="wt-set-page-h2">添加条目</h2>
+                            <div class="wt-ntm-add-section">
+                                <div class="wt-ntm-add-row">
+                                    <div class="wt-ntm-add-row-lead">
+                                        <h4>配置文件</h4>
+                                        <p>将指定 Shell 配置文件加入菜单。</p>
+                                    </div>
+                                    <div class="wt-ntm-add-row-ctrl">
+                                        <select class="wt-set-select wt-ntm-pick-profile" aria-label="要添加的配置文件">
+                                            <option value="daemon">管理员：Powershell</option>
+                                            <option value="powershell">PowerShell</option>
+                                            <option value="khsl">KHSL</option>
+                                        </select>
+                                        <button type="button" class="wt-ntm-add-btn wt-ntm-add-profile-btn" title="添加">+</button>
+                                    </div>
+                                </div>
+                                <div class="wt-ntm-add-row">
+                                    <div class="wt-ntm-add-row-lead">
+                                        <h4>分隔符</h4>
+                                        <p>在菜单中添加一条水平分隔线。</p>
+                                    </div>
+                                    <div class="wt-ntm-add-row-ctrl">
+                                        <button type="button" class="wt-ntm-add-btn wt-ntm-add-sep-btn" title="添加分隔符">+</button>
+                                    </div>
+                                </div>
+                                <div class="wt-ntm-add-row">
+                                    <div class="wt-ntm-add-row-lead">
+                                        <h4>文件夹</h4>
+                                        <p>创建子菜单分组（名称将显示在下拉项中）。</p>
+                                    </div>
+                                    <div class="wt-ntm-add-row-ctrl">
+                                        <input type="text" class="wt-ntm-folder-input wt-ntm-folder-name" placeholder="文件夹名" maxlength="64" autocomplete="off" aria-label="文件夹名称">
+                                        <button type="button" class="wt-ntm-add-btn wt-ntm-add-folder-btn" title="添加文件夹">+</button>
+                                    </div>
+                                </div>
+                                <div class="wt-ntm-add-row">
+                                    <div class="wt-ntm-add-row-lead">
+                                        <h4>配置文件匹配器</h4>
+                                        <p>按正则等规则批量匹配并添加一组配置文件（本端尚未接入，按钮占位）。</p>
+                                    </div>
+                                    <div class="wt-ntm-add-row-ctrl">
+                                        <button type="button" class="wt-ntm-add-btn" disabled title="即将支持">+</button>
+                                    </div>
+                                </div>
+                                <div class="wt-ntm-add-row">
+                                    <div class="wt-ntm-add-row-lead">
+                                        <h4>剩余配置文件</h4>
+                                        <p>表示所有未单独列出的配置文件；菜单中仅能存在一项。</p>
+                                    </div>
+                                    <div class="wt-ntm-add-row-ctrl">
+                                        <button type="button" class="wt-ntm-add-btn wt-ntm-add-remaining-btn" disabled title="已在列表中">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        <section class="wt-set-page" data-page="extensions">
+                            <h1 class="wt-set-page-title">扩展</h1>
+                            <p class="wt-set-page-hero-desc">管理动态配置文件生成器（版式参考 Windows Terminal「扩展」）。KH 终端无 Microsoft Store 扩展管线；下列项用于 UI 对齐与偏好占位，部分开关可持久化。</p>
+                            <a class="wt-set-link-inline" href="https://learn.microsoft.com/windows/terminal/" target="_blank" rel="noopener noreferrer">了解有关扩展的详细信息（Microsoft 文档）</a>
+                            <h2 class="wt-set-page-h2">活动扩展</h2>
+                            <p class="wt-ext-muted">启用后可在「配置文件」列表中由生成器提供条目（当前为占位，不连接商店）。</p>
+                            <div class="wt-ext-card">
+                                <div class="wt-ext-card-ico" aria-hidden="true">☁</div>
+                                <div class="wt-ext-card-body">
+                                    <h4>Azure Cloud Shell 配置文件生成器</h4>
+                                    <p>Windows.Terminal.Azure</p>
+                                </div>
+                                <button type="button" class="wt-set-toggle wt-ext-gen-toggle" data-wt-ext="azure" aria-pressed="false" title="开关"></button>
+                                <span class="wt-ext-chevron" aria-hidden="true" style="color:var(--wt-set-page-desc)">›</span>
+                            </div>
+                            <div class="wt-ext-card">
+                                <div class="wt-ext-card-ico" aria-hidden="true">⊞</div>
+                                <div class="wt-ext-card-body">
+                                    <h4>PowerShell 配置文件生成器</h4>
+                                    <p>Windows.Terminal.PowershellCore</p>
+                                </div>
+                                <button type="button" class="wt-set-toggle wt-ext-gen-toggle" data-wt-ext="powershellCore" aria-pressed="false" title="开关"></button>
+                                <span class="wt-ext-chevron" aria-hidden="true" style="color:var(--wt-set-page-desc)">›</span>
+                            </div>
+                            <div class="wt-ext-card">
+                                <div class="wt-ext-card-ico" aria-hidden="true">🐧</div>
+                                <div class="wt-ext-card-body">
+                                    <h4>Ubuntu / Linux 环境生成器（占位）</h4>
+                                    <p>CanonicalGroupLimited.Ubuntu*(…)</p>
+                                </div>
+                                <button type="button" class="wt-set-toggle wt-ext-gen-toggle" data-wt-ext="ubuntuLts" aria-pressed="false" title="开关"></button>
+                                <span class="wt-ext-chevron" aria-hidden="true" style="color:var(--wt-set-page-desc)">›</span>
+                            </div>
+                            <div class="wt-ext-card">
+                                <div class="wt-ext-card-ico" aria-hidden="true">🛠</div>
+                                <div class="wt-ext-card-body">
+                                    <h4>Visual Studio 配置文件生成器</h4>
+                                    <p>Windows.Terminal.VisualStudio</p>
+                                </div>
+                                <button type="button" class="wt-set-toggle wt-ext-gen-toggle" data-wt-ext="visualStudio" aria-pressed="false" title="开关"></button>
+                                <span class="wt-ext-chevron" aria-hidden="true" style="color:var(--wt-set-page-desc)">›</span>
+                            </div>
+                            <div class="wt-ext-card">
+                                <div class="wt-ext-card-ico" aria-hidden="true">⧉</div>
+                                <div class="wt-ext-card-body">
+                                    <h4>WSL 发行版配置文件生成器</h4>
+                                    <p>Windows.Terminal.Wsl</p>
+                                </div>
+                                <button type="button" class="wt-set-toggle wt-ext-gen-toggle" data-wt-ext="wsl" aria-pressed="false" title="开关"></button>
+                                <span class="wt-ext-chevron" aria-hidden="true" style="color:var(--wt-set-page-desc)">›</span>
+                            </div>
+                            <div class="wt-ext-card">
+                                <div class="wt-ext-card-ico" aria-hidden="true">◆</div>
+                                <div class="wt-ext-card-body">
+                                    <h4>KH 终端内置配置发现</h4>
+                                    <p>kh.terminal.builtinProfiles</p>
+                                </div>
+                                <button type="button" class="wt-set-toggle wt-ext-gen-toggle" data-wt-ext="khBuiltin" aria-pressed="true" title="开关"></button>
+                                <span class="wt-ext-chevron" aria-hidden="true" style="color:var(--wt-set-page-desc)">›</span>
+                            </div>
+                            <h2 class="wt-set-page-h2">已修改配置文件</h2>
+                            <p class="wt-ext-muted">由扩展生成、且已被手动编辑的配置文件。当前无条目。</p>
+                            <div class="wt-ext-profile-row">
+                                <span class="wt-ext-card-ico" aria-hidden="true">—</span>
+                                <div class="wt-ext-card-body">
+                                    <h4 style="font-weight:500">（无）</h4>
+                                    <p>—</p>
+                                </div>
+                                <select class="wt-set-select" disabled aria-label="来源扩展">
+                                    <option>—</option>
+                                </select>
+                            </div>
+                            <h2 class="wt-set-page-h2">已添加配置文件</h2>
+                            <p class="wt-ext-muted">由扩展自动注入的配置文件（本应用内置三项与菜单一致）。</p>
+                            <div class="wt-ext-profile-row">
+                                <span class="wt-mi-ico" style="margin-left:4px" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="#5eb0ff" d="M4 5h16v14H4V5zm2 2v10h12V7H6zm2 2h8v2H8V9zm0 3h5v2H8v-2z"/></svg></span>
+                                <div class="wt-ext-card-body">
+                                    <h4 style="font-weight:500">PowerShell</h4>
+                                    <p>profile: powershell</p>
+                                </div>
+                                <select class="wt-set-select" disabled aria-label="来源">
+                                    <option>kh.terminal.builtinProfiles</option>
+                                </select>
+                            </div>
+                            <div class="wt-ext-profile-row">
+                                <span class="wt-mi-ico" style="margin-left:4px" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><rect x="3" y="3" width="18" height="18" rx="4" fill="#6c5ce7"/><path fill="#fff" d="M8 8h2v8H8V8zm3.2 0h2.2L16 12l-2.6 4h-2.2l2.3-4-2.3-4z"/></svg></span>
+                                <div class="wt-ext-card-body">
+                                    <h4 style="font-weight:500">KHSL</h4>
+                                    <p>profile: khsl</p>
+                                </div>
+                                <select class="wt-set-select" disabled aria-label="来源">
+                                    <option>kh.terminal.builtinProfiles</option>
+                                </select>
+                            </div>
+                            <div class="wt-ext-profile-row">
+                                <span class="wt-mi-ico" style="margin-left:4px" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="#ffb74d" d="M12 2L4 9v13h16V9l-8-7z"/></svg></span>
+                                <div class="wt-ext-card-body">
+                                    <h4 style="font-weight:500">管理员：Powershell</h4>
+                                    <p>profile: daemon</p>
+                                </div>
+                                <select class="wt-set-select" disabled aria-label="来源">
+                                    <option>kh.terminal.builtinProfiles</option>
+                                </select>
+                            </div>
+                        </section>
+                        <section class="wt-set-page" data-page="profileDefaults">
+                            <h1 class="wt-set-page-title">默认值</h1>
+                            <p class="wt-set-page-hero-desc">此处定义的设置将应用到所有配置文件，除非它们被具体配置文件覆盖。与 Windows Terminal「配置文件 → 默认值」对齐；部分项依赖原生 PTY / 权限，当前为偏好持久化或占位说明。</p>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>启动目录</h3>
+                                    <p>加载配置文件时 Shell 的起始目录。Web / 集成层须支持传入 cwd 后方可完全生效。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <select class="wt-set-select wt-def-start-dir-mode" aria-label="启动目录">
+                                        <option value="inherit">使用父进程目录</option>
+                                        <option value="custom">自定义路径</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>自定义路径</h3>
+                                    <p>起始目录的绝对路径（仅当上一项为「自定义路径」时读取）。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <input type="text" class="wt-set-input wt-def-start-dir-path" autocomplete="off" spellcheck="false" placeholder="例如 C:\Users\name\project" aria-label="自定义启动目录">
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>图标</h3>
+                                    <p>配置文件使用的表情符号或图像路径占位（标签图标样式后续可读取此项）。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <input type="text" class="wt-set-input wt-def-profile-icon" autocomplete="off" placeholder="emoji 或路径" aria-label="配置文件图标">
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>选项卡标题</h3>
+                                    <p>是否用静态配置文件名称作为初始标题，或交给 shell 动态设置（OSC）。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <select class="wt-set-select wt-def-tab-title-mode" aria-label="选项卡标题">
+                                        <option value="none">无（跟随 shell）</option>
+                                        <option value="profileName">使用配置文件名称</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>以管理员身份运行此配置文件</h3>
+                                    <p>对应提升权限启动；当前环境由系统集成决定，此项仅持久化偏好与说明。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-def-elevate" aria-pressed="false" title="开关"></button>
+                                </div>
+                            </div>
+                            <h2 class="wt-set-page-h3">其他设置</h2>
+                            <button type="button" class="wt-set-sub-row" data-profile-subnav="profileDefaultsAppearance" title="打开默认值外观设置">
+                                <span>外观</span>
+                                <span class="wt-set-sub-chevron" aria-hidden="true">›</span>
+                            </button>
+                            <button type="button" class="wt-set-sub-row wt-set-sub-row--disabled" disabled title="即将支持">终端仿真<span class="wt-set-sub-chevron" aria-hidden="true">›</span></button>
+                            <button type="button" class="wt-set-sub-row wt-set-sub-row--disabled" disabled title="即将支持">高级<span class="wt-set-sub-chevron" aria-hidden="true">›</span></button>
+                        </section>
+                        <section class="wt-set-page" data-page="profileDefaultsAppearance">
+                            <div class="wt-set-breadcrumb">
+                                <button type="button" data-profile-breadcrumb-back="profileDefaults">默认值</button>
+                                <span aria-hidden="true"> › </span>
+                                <span>外观</span>
+                            </div>
+                            <h1 class="wt-set-page-title">默认值 &gt; 外观</h1>
+                            <p class="wt-set-page-hero-desc">此处设置作用于所有配置文件的终端外观，除非某配置文件单独覆盖。预览为示意，实际渲染以 xterm 为准。</p>
+                            <div class="wt-def-term-preview">
+                                <div class="wt-def-term-preview-head">终端预览</div>
+                                <div class="wt-def-term-preview-body" aria-hidden="true"></div>
+                            </div>
+                            <h2 class="wt-set-page-h3">文本</h2>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>配色方案</h3>
+                                    <p>与「设置 → 配色方案」同一套预设；可展开以覆盖前景/背景（通过全局配色方案页同步）。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <select class="wt-set-select wt-def-scheme-select" aria-label="配色方案"></select>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>字体</h3>
+                                    <p>主字体族名，回退链与内置 WT 一致。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <input type="text" class="wt-set-input wt-def-font-family" autocomplete="off" spellcheck="false" aria-label="字体">
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>显示所有字体</h3>
+                                    <p>列表枚举系统字体（Web 环境受限，占位）。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <label class="wt-set-checkbox-label"><input type="checkbox" class="wt-def-show-all-fonts" disabled> 显示所有字体</label>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>字号</h3>
+                                    <p>像素字号，与「外观」页、Ctrl+滚轮缩放联动（8–36）。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <input type="number" class="wt-set-input wt-set-input-sm wt-def-fontsize" min="8" max="36" step="1" aria-label="字号">
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>行高</h3>
+                                    <p>相对字号的行高倍数（例如 1.2）。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <input type="number" class="wt-set-input wt-set-input-sm wt-def-line-height" min="1" max="3" step="0.05" aria-label="行高">
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>单元格宽度</h3>
+                                    <p>对应 xterm <code>letterSpacing</code>（像素级字符间距）。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <input type="number" class="wt-set-input wt-set-input-sm wt-def-letter-spacing" min="-2" max="8" step="0.1" aria-label="单元格宽度">
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>字体粗细</h3>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <select class="wt-set-select wt-def-font-weight" aria-label="字体粗细">
+                                        <option value="normal">正常</option>
+                                        <option value="bold">粗体</option>
+                                        <option value="100">100</option>
+                                        <option value="400">400</option>
+                                        <option value="600">600</option>
+                                        <option value="700">700</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>内置字形</h3>
+                                    <p>使用终端绘制框线字符等（xterm 管线占位，偏好持久化）。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-def-custom-glyphs" aria-pressed="true" title="开关"></button>
+                                </div>
+                            </div>
+                            <h2 class="wt-set-page-h3">渲染</h2>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>全色表符号</h3>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-def-color-emoji" aria-pressed="true" title="开关"></button>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>复古终端效果</h3>
+                                    <p>扫描线等（当前未接 shader，占位）。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-def-retro" aria-pressed="false" title="开关"></button>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>自动调整无法区分的文本</h3>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <select class="wt-set-select wt-def-adjust-colors" aria-label="对比度调整">
+                                        <option value="never">从不</option>
+                                        <option value="indexed">索引色时</option>
+                                        <option value="always">始终</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <h2 class="wt-set-page-h3">光标</h2>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>光标形状</h3>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <select class="wt-set-select wt-def-cursor-style" aria-label="光标形状">
+                                        <option value="bar">条形 (|)</option>
+                                        <option value="block">方块</option>
+                                        <option value="underline">下划线</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>光标颜色</h3>
+                                    <p>留空则使用配色方案默认；可填 <code>#RRGGBB</code> 覆盖。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <input type="text" class="wt-set-input wt-def-cursor-color" autocomplete="off" placeholder="#FFFFFF" aria-label="光标颜色">
+                                </div>
+                            </div>
+                            <h2 class="wt-set-page-h3">背景图像</h2>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>背景图像路径</h3>
+                                    <p>Web 环境请尽量使用 <code>http(s)</code> / <code>data:</code> 可访问地址；本地路径依赖宿主解析。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <input type="text" class="wt-set-input wt-def-bg-path" autocomplete="off" spellcheck="false" aria-label="背景图像路径">
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>拉伸模式</h3>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <select class="wt-set-select wt-def-bg-stretch" aria-label="背景拉伸">
+                                        <option value="uniformToFill">均匀填充</option>
+                                        <option value="uniform">均匀</option>
+                                        <option value="fill">填充</option>
+                                        <option value="none">无拉伸</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>对齐</h3>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <select class="wt-set-select wt-def-bg-align" aria-label="背景对齐">
+                                        <option value="center">居中</option>
+                                        <option value="top">靠上</option>
+                                        <option value="bottom">靠下</option>
+                                        <option value="left">靠左</option>
+                                        <option value="right">靠右</option>
+                                        <option value="topLeft">左上</option>
+                                        <option value="topRight">右上</option>
+                                        <option value="bottomLeft">左下</option>
+                                        <option value="bottomRight">右下</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>背景图像不透明度</h3>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <div class="wt-set-range-row">
+                                        <input type="range" class="wt-def-bg-img-opacity" min="0" max="100" step="1" aria-valuemin="0" aria-valuemax="100" aria-label="背景图像不透明度">
+                                        <span class="wt-set-range-val wt-def-bg-img-opacity-val">100%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <h2 class="wt-set-page-h3">文本格式</h2>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>强调文本样式</h3>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <select class="wt-set-select wt-def-intense-style" aria-label="强调文本">
+                                        <option value="bright">亮色</option>
+                                        <option value="bold">粗体</option>
+                                        <option value="all">全部</option>
+                                        <option value="none">无</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <h2 class="wt-set-page-h3">透明度</h2>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>背景不透明度</h3>
+                                    <p>终端画布背景色的 Alpha（100 为不透明）。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <div class="wt-set-range-row">
+                                        <input type="range" class="wt-def-terminal-bg-opacity" min="10" max="100" step="1" aria-label="背景不透明度">
+                                        <span class="wt-set-range-val wt-def-terminal-bg-opacity-val">100%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>启用亚克力材料</h3>
+                                    <p>窗格区域背景模糊（WebView 支持 <code>backdrop-filter</code> 时可见）。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <button type="button" class="wt-set-toggle wt-def-acrylic" aria-pressed="false" title="开关"></button>
+                                </div>
+                            </div>
+                            <h2 class="wt-set-page-h3">窗口</h2>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>边距</h3>
+                                    <p>四边像素，格式与 WT 相同，例如 <code>8, 8, 8, 8</code>。</p>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <input type="text" class="wt-set-input wt-def-padding" autocomplete="off" spellcheck="false" aria-label="边距">
+                                </div>
+                            </div>
+                            <div class="wt-set-card">
+                                <div class="wt-set-card-lead">
+                                    <h3>滚动条可见性</h3>
+                                </div>
+                                <div class="wt-set-card-ctrl">
+                                    <select class="wt-set-select wt-def-scrollbar" aria-label="滚动条">
+                                        <option value="visible">可见</option>
+                                        <option value="hidden">隐藏</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                    <footer class="wt-settings-footer">
+                        <button type="button" class="wt-set-btn-secondary wt-set-discard-btn">放弃更改</button>
+                        <button type="button" class="wt-set-btn-primary wt-set-save-btn">保存</button>
+                    </footer>
+                </div>
+            </div>
+        </div>
+    </template>
+    <script src="terminal-app.js"></script>
+</body>
+
+</html>

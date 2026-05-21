@@ -1,0 +1,58 @@
+// 目标运行系统：KaihongOS。下列 runtimeOS 等取值为当前 SDK/hvigor 产品模型约定，不代表「仅针对开源 OpenHarmony 社区发行版」。
+{
+  "app": {
+    "signingConfigs": [
+      {
+        "name": "default",
+        "material": {
+          "certpath": "C:/Users/kaihong/.ohos/config/openharmony/default_kh_terminal_zZy6zvTMqyCJJzVPArGN8djVhrFbiUuyoHUL7r9LEF0=.cer",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001AC73DAA133BF36953839D0ABA9F4C278722F0CFA2C4CD8EFD53FFC839209B8B275ABED1B417F3",
+          "profile": "C:/Users/kaihong/.ohos/config/openharmony/default_kh_terminal_zZy6zvTMqyCJJzVPArGN8djVhrFbiUuyoHUL7r9LEF0=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "C:/Users/kaihong/.ohos/config/openharmony/default_kh_terminal_zZy6zvTMqyCJJzVPArGN8djVhrFbiUuyoHUL7r9LEF0=.p12",
+          "storePassword": "0000001ACC0E16807BDCBAF6CD07178F68844DFEDA0BA1FA1742FF8F5AC4ACBC9FA629CF61248A7DA643"
+        }
+      }
+    ],
+    "products": [
+      {
+        "name": "default",
+        "signingConfig": "default",
+        "compileSdkVersion": 23,
+        "targetSdkVersion": 23,
+        "compatibleSdkVersion": 23,
+        // 工具链字段：保持与 SDK 模板一致；设备侧为 KaihongOS
+        "runtimeOS": "OpenHarmony",
+        "buildOption": {
+          "strictMode": {
+            "caseSensitiveCheck": true,
+            "useNormalizedOHMUrl": true
+          }
+        }
+      }
+    ],
+    "buildModeSet": [
+      {
+        "name": "debug",
+      },
+      {
+        "name": "release"
+      }
+    ]
+  },
+  "modules": [
+    {
+      "name": "entry",
+      "srcPath": "./entry",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    }
+  ]
+}

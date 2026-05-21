@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "KaihongOS 终端（Web + PTY）"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "终端主入口"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "kh_terminal"
+    }
+  ]
+}
