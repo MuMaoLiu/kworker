@@ -1,0 +1,9 @@
+========================================
+ Kaihong Shell Layer (KHSL)
+ Local dev shell for KaihongOS / OpenHarmony
+
+ * See product documentation for details.
+ * Skip this file + banner tips: touch ~/.hushlogin in your HOME
+ * Chinese MOTD/help: UTF-8 terminal + export KHSL_HELP=zh
+========================================
+

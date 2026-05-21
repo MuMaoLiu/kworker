@@ -1,0 +1,32 @@
+import("//build/ohos.gni")
+
+# at ./system/bin/kh_term_daemon
+ohos_executable("kh_term_daemon") {
+  sources = [ "main.cpp" ]
+  include_dirs = []
+  deps = []
+  part_name = "product_khdvk_rk3568_a"
+  subsystem_name = "product_khdvk_rk3568_a"
+  install_enable = true
+  
+  # Completely bypass the mini_debug_info.py script by overriding the link wrapper
+  # or disabling the feature at the target level if supported by OHOS GN rules.
+  # In OHOS, setting symlink to false or overriding configs can help.
+  configs = [ "//build/config/compiler:no_symbols" ]
+  remove_configs = [ "//build/config/compiler:default_symbols" ]
+}
+
+# at ./system/etc/init/kh_term_daemon.cfg
+ohos_prebuilt_etc("kh_term_daemon.cfg") {
+  source = "kh_term_daemon.cfg"
+  relative_install_dir = "init"
+  part_name = "product_khdvk_rk3568_a"
+  subsystem_name = "product_khdvk_rk3568_a"
+}
+
+group("kh_term_daemon_group") {
+  deps = [
+    ":kh_term_daemon",
+    ":kh_term_daemon.cfg",
+  ]
+}

@@ -1,0 +1,25 @@
+import("//build/ohos.gni")
+
+ohos_executable("khsl") {
+  sources = [ "main.c" ]
+  include_dirs = []
+  deps = []
+  part_name = "product_khdvk_rk3568_a"
+  subsystem_name = "product_khdvk_rk3568_a"
+  install_enable = true
+}
+
+ohos_prebuilt_etc("khsl_motd") {
+  source = "etc/motd"
+  relative_install_dir = "khsl"
+  part_name = "product_khdvk_rk3568_a"
+  subsystem_name = "product_khdvk_rk3568_a"
+  install_enable = true
+}
+
+group("khsl_group") {
+  deps = [
+    ":khsl",
+    ":khsl_motd",
+  ]
+}

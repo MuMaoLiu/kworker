@@ -1,0 +1,30 @@
+import("//build/ohos.gni")
+
+action("build_bash") {
+  script = "build_bash.sh"
+  outputs = [
+    "${target_out_dir}/bash_build/bash"
+  ]
+  
+  args = [
+    rebase_path("bash-5.2", root_build_dir),
+    rebase_path("${target_out_dir}/bash_build", root_build_dir),
+    rebase_path("//prebuilts/clang/ohos/linux-x86_64/llvm/bin", root_build_dir),
+    target_cpu,
+    rebase_path("${root_build_dir}/obj/third_party/musl", root_build_dir)
+  ]
+}
+
+ohos_prebuilt_executable("bash") {
+  deps = [ ":build_bash" ]
+  source = "${target_out_dir}/bash_build/bash"
+  install_enable = true
+  part_name = "product_khdvk_rk3568_a"
+  subsystem_name = "product_khdvk_rk3568_a"
+}
+
+group("bash_group") {
+  deps = [
+    ":bash"
+  ]
+}
