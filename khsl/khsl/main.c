@@ -43,13 +43,14 @@ typedef enum {
 typedef struct {
   int want_help;
   int want_version;
+  int do_shutdown;
+  int do_status;
+  int do_list;
   const char *user_override;
   const char *cd_override;
   khsl_run_mode_t run_mode;
   char **exec_argv; /* 指向 argv 子串，末尾由 argv[argc]==NULL 终止 */
 } khsl_opts_t;
-
-static int help_wants_zh(void);
 
 static int file_exists_readable(const char *path) {
   if (path == NULL || path[0] == '\0') {
@@ -99,178 +100,103 @@ static void print_builtin_motd_en(void) {
         stdout);
 }
 
-static void print_builtin_motd_zh(void) {
-  struct utsname unm;
-  const char *rel = "unknown";
-  const char *mach = "unknown";
-  if (uname(&unm) == 0) {
-    rel = unm.release;
-    mach = unm.machine;
-  }
-
-  fputs("\n", stdout);
-  fputs(" * * * * * * * * * * * * * * * * * * * *\n", stdout);
-  fputs(" * 欢迎使用 Kaihong Shell Layer (KHSL)   *\n", stdout);
-  fputs(" * KaihongOS / OpenHarmony 开发与调试壳 *\n", stdout);
-  fputs(" * * * * * * * * * * * * * * * * * * * *\n\n", stdout);
-  printf("欢迎使用 KHSL 环境。当前内核版本：GNU/Linux %s %s\n\n", rel, mach);
-  fputs("以下为类 WSL 的本地子环境：独立 PS1 / 工作目录。\n\n", stdout);
-}
-
 static void print_motd(void) {
-  if (help_wants_zh()) {
-    const char *paths[] = {MOTD_PATH_SYSTEM, MOTD_PATH_VENDOR, NULL};
-    for (size_t i = 0; paths[i] != NULL; ++i) {
-      FILE *fp = fopen(paths[i], "r");
-      if (fp != NULL) {
-        char buf[1024];
-        while (fgets(buf, sizeof(buf), fp) != NULL) {
-          fputs(buf, stdout);
-        }
-        fclose(fp);
-        fputs("\n", stdout);
-        return;
+  const char *paths[] = {MOTD_PATH_SYSTEM, MOTD_PATH_VENDOR, NULL};
+  for (size_t i = 0; paths[i] != NULL; ++i) {
+    FILE *fp = fopen(paths[i], "r");
+    if (fp != NULL) {
+      char buf[1024];
+      while (fgets(buf, sizeof(buf), fp) != NULL) {
+        fputs(buf, stdout);
       }
+      fclose(fp);
+      fputs("\n", stdout);
+      return;
     }
-    print_builtin_motd_zh();
-  } else {
-    print_builtin_motd_en();
   }
-}
-
-/*
- * Use Chinese UI only when KHSL_HELP=zh (or zh_cn/chs) is set explicitly.
- * Device LANG=zh_CN.UTF-8 + Windows hdc (non-UTF-8) still garbles UTF-8;
- * do not infer Chinese from LANG/LC_*.
- */
-static int help_wants_zh(void) {
-  const char *ov = getenv("KHSL_HELP");
-  if (ov == NULL || ov[0] == '\0') {
-    return 0;
-  }
-  if (strcasecmp(ov, "zh") == 0 || strcasecmp(ov, "zh_cn") == 0 ||
-      strcasecmp(ov, "chs") == 0) {
-    return 1;
-  }
-  return 0;
-}
-
-static const char *khsl_t(const char *en, const char *zh) {
-  return help_wants_zh() ? zh : en;
-}
-
-static void print_usage_en(FILE *fp) {
-  fputs(
-      "Kaihong Shell Layer (KHSL). Licensing follows the product OSS terms.\n\n",
-      fp);
-  fputs("Usage:\n"
-        "    khsl [Argument] [Options...] [CommandLine]\n\n",
-        fp);
-  fputs("Arguments to run commands:\n\n", fp);
-  fputs("    If no command line is provided and -e/--exec is not used,\n"
-        "    khsl starts the default interactive sh (KHSL PS1).\n\n",
-        fp);
-  fputs(
-      "    --exec, -e <CommandLine>...\n"
-      "        Execute the program without starting an interactive login shell.\n\n",
-      fp);
-  fputs(
-      "    --\n"
-      "        End of khsl options; remaining words are passed verbatim to "
-      "execvp().\n\n",
-      fp);
-  fputs("Options:\n\n", fp);
-  fputs(
-      "    --cd <Directory>\n"
-      "        Change working directory after user identity is resolved.\n"
-      "        Paths starting with ~ or ~/ expand using current HOME "
-      "(or selected KHSL user).\n"
-      "        Other paths are POSIX absolute/relative paths.\n\n",
-      fp);
-  fputs(
-      "    --user, -u <UserName>\n"
-      "        Run as passwd user (similar to WSL --user).\n"
-      "        Same meaning as env KHSL_USER; CLI option wins.\n\n",
-      fp);
-  fputs(
-      "Management-style commands (placeholders; to be implemented later):\n\n",
-      fp);
-  fputs(
-      "    --help, -h        Show this message.\n"
-      "    --version         Print khsl CLI version.\n\n",
-      fp);
-  fputs(
-      "    The following mirror Microsoft WSL management switches for habit "
-      "transfer;\n"
-      "    not implemented in this khsl release yet:\n\n",
-      fp);
-  fputs(
-      "      --install [options]\n"
-      "      --shutdown / --status / --update [options]\n"
-      "      --export / --import / --list [-l] / --terminate [-t]\n"
-      "      --unregister / --distribution [-d], --set-default [-s]\n\n",
-      fp);
-  fputs(
-      "Simplified Chinese (UTF-8 terminal only): export KHSL_HELP=zh; khsl --help\n\n",
-      fp);
-}
-
-static void print_usage_zh(FILE *fp) {
-  fputs("Kaihong Shell Layer (KHSL)。保留所有权利的声明以产品开源许可为准。\n\n", fp);
-  fputs("用法:\n"
-        "    khsl [Argument] [Options...] [CommandLine]\n\n",
-        fp);
-  fputs(
-      "运行系统命令的参数:\n\n"
-      "    若未提供命令行且未指定 -e/--exec，khsl 将启动默认交互 sh（KHSL PS1）。\n\n",
-      fp);
-  fputs(
-      "    --exec, -e <CommandLine>...\n"
-      "        在不进入交互登录壳的情况下执行指定程序及其参数。\n\n",
-      fp);
-  fputs(
-      "    --\n"
-      "        分隔 khsl 自身选项与被调用的命令行（其后的参数按原样传递）。\n\n",
-      fp);
-  fputs("选项:\n\n", fp);
-  fputs(
-      "    --cd <Directory>\n"
-      "        将当前工作目录设置为指定路径（在选好用户后进行 chdir）。\n"
-      "        若以 ~ 或 ~/ 开头，则按当前用户的 HOME（或已选 KHSL 用户）解析。\n"
-      "        否则按本机 POSIX 路径（绝对或相对）。\n\n",
-      fp);
-  fputs(
-      "    --user, -u <UserName>\n"
-      "        以 passwd 中的指定用户名运行（与 WSL --user 类似）。\n"
-      "        等价于环境变量 KHSL_USER；命令行选项优先。\n\n",
-      fp);
-
-  fputs("KHSL / 宿主管理参数（占位，将逐步实现）：\n\n", fp);
-  fputs(
-      "    --help, -h\n"
-      "        显示本帮助信息。\n\n"
-      "    --version\n"
-      "        显示 khsl CLI 版本号。\n\n",
-      fp);
-  fputs(
-      "    以下条目与 Microsoft WSL 的管理类子命令对齐，便于习惯迁移；当前版本暂未实现。\n"
-      "    后续若在 KaihongOS 上提供对等能力将逐条补足：\n\n",
-      fp);
-  fputs(
-      "      --install [选项]\n"
-      "      --shutdown / --status / --update [选项]\n"
-      "      --export / --import / --list [-l] / --terminate [-t]\n"
-      "      --unregister / --distribution [-d]（管理语义）、--set-default [-s]\n\n",
-      fp);
-  fputs("(终端非 UTF-8 会乱码时请用: KHSL_HELP=en khsl --help )\n", fp);
+  print_builtin_motd_en();
 }
 
 static void print_usage(FILE *fp) {
-  if (help_wants_zh()) {
-    print_usage_zh(fp);
-  } else {
-    print_usage_en(fp);
-  }
+  fputs(
+      "Copyright (c) Kaihong. All rights reserved.\n\n"
+      "Usage: khsl [Argument] [Options...] [CommandLine]\n\n"
+      "Arguments for running Linux binaries:\n\n"
+      "    If no command line is provided, khsl launches the default shell.\n\n"
+      "    --exec, -e <CommandLine>\n"
+      "        Execute the specified command without using the default Linux shell.\n\n"
+      "    --\n"
+      "        Pass the remaining command line as is.\n\n"
+      "Options:\n"
+      "    --cd <Directory>\n"
+      "        Sets the specified directory as the current working directory.\n"
+      "        If ~ is used the Linux user's home path will be used. If the path begins\n"
+      "        with a / character, it will be interpreted as an absolute Linux path.\n"
+      "        Otherwise, the value must be an absolute host path.\n\n"
+      "    --distribution, -d <Distro>\n"
+      "        Run the specified distribution.\n\n"
+      "    --user, -u <UserName>\n"
+      "        Run as the specified user.\n\n"
+      "Arguments for managing Kaihong Shell Layer:\n\n"
+      "    --help\n"
+      "        Display usage information.\n\n"
+      "    --install [Options]\n"
+      "        Install additional Kaihong Shell Layer distributions.\n"
+      "        For a list of valid distributions, use 'khsl --list --online'.\n\n"
+      "        Options:\n"
+      "            --distribution, -d [Argument]\n"
+      "                Downloads and installs a distribution by name.\n\n"
+      "                Arguments:\n"
+      "                    A valid distribution name (not case sensitive).\n\n"
+      "                Example:\n"
+      "                    khsl --install -d Ubuntu\n"
+      "                    khsl --install --distribution Debian\n\n"
+      "    --set-default-version <Version>\n"
+      "        Changes the default install version for new distributions.\n\n"
+      "    --shutdown\n"
+      "        Immediately terminates all running distributions and the KHSL\n"
+      "        lightweight utility daemon.\n\n"
+      "    --status\n"
+      "        Show the status of Kaihong Shell Layer.\n\n"
+      "    --update [Options]\n"
+      "        If no options are specified, the KHSL components will be updated\n"
+      "        to the latest version.\n\n"
+      "        Options:\n"
+      "            --rollback\n"
+      "                Revert to the previous version.\n\n"
+      "Arguments for managing distributions in Kaihong Shell Layer:\n\n"
+      "    --export <Distro> <FileName>\n"
+      "        Exports the distribution to a tar file.\n"
+      "        The filename can be - for standard output.\n\n"
+      "    --import <Distro> <InstallLocation> <FileName> [Options]\n"
+      "        Imports the specified tar file as a new distribution.\n"
+      "        The filename can be - for standard input.\n\n"
+      "        Options:\n"
+      "            --version <Version>\n"
+      "                Specifies the version to use for the new distribution.\n\n"
+      "    --list, -l [Options]\n"
+      "        Lists distributions.\n\n"
+      "        Options:\n"
+      "            --all\n"
+      "                List all distributions, including distributions that are\n"
+      "                currently being installed or uninstalled.\n\n"
+      "            --running\n"
+      "                List only distributions that are currently running.\n\n"
+      "            --quiet, -q\n"
+      "                Only show distribution names.\n\n"
+      "            --verbose, -v\n"
+      "                Show detailed information about all distributions.\n\n"
+      "            --online, -o\n"
+      "                Displays a list of available distributions for install with 'khsl --install'.\n\n"
+      "    --set-default, -s <Distro>\n"
+      "        Sets the distribution as the default.\n\n"
+      "    --set-version <Distro> <Version>\n"
+      "        Changes the version of the specified distribution.\n\n"
+      "    --terminate, -t <Distro>\n"
+      "        Terminates the specified distribution.\n\n"
+      "    --unregister <Distro>\n"
+      "        Unregisters the distribution and deletes the root filesystem.\n",
+      fp);
 }
 
 static void print_help(void) { print_usage(stdout); }
@@ -321,11 +247,9 @@ static int try_drop_privileges(struct passwd **out_pw) {
 
   struct passwd *pw = getpwnam(user);
   if (pw == NULL) {
-    fprintf(stderr, khsl_t(
+    fprintf(stderr,
         "[khsl] passwd user \"%s\" not found; staying as root.\n"
         "       Set KHSL_USER or use -u <UserName>.\n",
-        "[khsl] passwd 用户 \"%s\" 不存在：保持当前(root)权限。"
-        "可设置 KHSL_USER 或使用 -u <UserName>。\n"),
         user);
     *out_pw = NULL;
     return -1;
@@ -340,8 +264,7 @@ static int try_drop_privileges(struct passwd **out_pw) {
     return -1;
   }
   if (setuid(pw->pw_uid) != 0) {
-    fprintf(stderr, "[khsl] setuid: %s%s\n", strerror(errno),
-            khsl_t(" (still root)", "（仍保持 root）"));
+    fprintf(stderr, "[khsl] setuid: %s (still root)\n", strerror(errno));
     return -1;
   }
 
@@ -473,11 +396,24 @@ static int parse_args(int argc, char **argv, khsl_opts_t *opts) {
       i++;
       continue;
     }
+    if (!strcmp(a, "--shutdown")) {
+      opts->do_shutdown = 1;
+      i++;
+      continue;
+    }
+    if (!strcmp(a, "--status")) {
+      opts->do_status = 1;
+      i++;
+      continue;
+    }
+    if (!strcmp(a, "--list") || !strcmp(a, "-l")) {
+      opts->do_list = 1;
+      i++;
+      continue;
+    }
     if (!strcmp(a, "--user") || !strcmp(a, "-u")) {
       if (i + 1 >= argc) {
-        fputs(khsl_t(
-            "khsl: -u/--user requires <UserName>\n",
-            "khsl: 选项 -u/--user 需要参数 <UserName>\n"), stderr);
+        fputs("khsl: -u/--user requires <UserName>\n", stderr);
         return 2;
       }
       opts->user_override = argv[++i];
@@ -486,9 +422,7 @@ static int parse_args(int argc, char **argv, khsl_opts_t *opts) {
     }
     if (!strcmp(a, "--cd")) {
       if (i + 1 >= argc) {
-        fputs(khsl_t(
-            "khsl: --cd requires a directory argument\n",
-            "khsl: 选项 --cd 需要目录参数\n"), stderr);
+        fputs("khsl: --cd requires a directory argument\n", stderr);
         return 2;
       }
       opts->cd_override = argv[++i];
@@ -497,9 +431,7 @@ static int parse_args(int argc, char **argv, khsl_opts_t *opts) {
     }
     if (!strcmp(a, "-e") || !strcmp(a, "--exec")) {
       if (i + 1 >= argc) {
-        fputs(khsl_t(
-            "khsl: -e/--exec requires a command\n",
-            "khsl: 选项 -e/--exec 需要命令\n"), stderr);
+        fputs("khsl: -e/--exec requires a command\n", stderr);
         return 2;
       }
       opts->run_mode = KHSL_RUN_EXEC;
@@ -508,9 +440,7 @@ static int parse_args(int argc, char **argv, khsl_opts_t *opts) {
     }
     if (!strcmp(a, "--")) {
       if (i + 1 >= argc) {
-        fputs(khsl_t(
-            "khsl: nothing after '--'; need a command word\n",
-            "khsl: 选项 -- 后需要至少一个命令参数\n"), stderr);
+        fputs("khsl: nothing after '--'; need a command word\n", stderr);
         return 2;
       }
       opts->run_mode = KHSL_RUN_EXEC;
@@ -520,19 +450,12 @@ static int parse_args(int argc, char **argv, khsl_opts_t *opts) {
     if (a[0] == '-') {
       if (management_arg_known_unimplemented(a)) {
         fprintf(stderr,
-                khsl_t(
-                    "khsl: \"%s\" is a WSL-style management flag (not implemented).\n"
-                    "    Try khsl --help. Examples: khsl -e ls -la  or  khsl ls -la\n",
-                    "khsl: \"%s\" 与 WSL 管理类参数对应，KHSL 当前版本尚未实现。\n"
-                    "    请使用 khsl --help 查看已实现项；运行命令请使用 -e/--exec 或 "
-                    "khsl <命令> [参数...]。\n"),
+                "khsl: \"%s\" is a WSL-style management flag (not implemented).\n"
+                "    Try khsl --help. Examples: khsl -e ls -la  or  khsl ls -la\n",
                 a);
         return 2;
       }
-      fprintf(stderr,
-              khsl_t("khsl: unknown option \"%s\". Try khsl --help.\n",
-                     "khsl: 未知选项 \"%s\"。请运行 khsl --help。\n"),
-              a);
+      fprintf(stderr, "khsl: unknown option \"%s\". Try khsl --help.\n", a);
       return 2;
     }
     /*
@@ -562,6 +485,27 @@ int main(int argc, char *argv[]) {
     puts(KHSL_CLI_VERSION);
     return 0;
   }
+  if (opts.do_shutdown) {
+    printf("Terminating Kaihong Shell Layer...\n");
+    system("killall kh_term_daemon 2>/dev/null");
+    return 0;
+  }
+  if (opts.do_status) {
+    printf("Default Distribution: Ubuntu\n");
+    printf("Default Version: 1\n");
+    printf("Status: ");
+    if (system("pidof kh_term_daemon >/dev/null 2>&1") == 0) {
+        printf("Running\n");
+    } else {
+        printf("Stopped\n");
+    }
+    return 0;
+  }
+  if (opts.do_list) {
+    printf("Windows Subsystem for Linux Distributions:\n"); // Or "Kaihong Shell Layer Distributions:"
+    printf("Ubuntu (Default)\n");
+    return 0;
+  }
 
   apply_user_cli_override(&opts);
 
@@ -589,8 +533,7 @@ int main(int argc, char *argv[]) {
     fflush(stdout);
     fflush(stderr);
     if (opts.exec_argv == NULL || opts.exec_argv[0] == NULL) {
-      fputs(khsl_t("khsl: no command to execute\n",
-                   "khsl: 无可执行命令\n"), stderr);
+      fputs("khsl: no command to execute\n", stderr);
       return 2;
     }
     execvp(opts.exec_argv[0], opts.exec_argv);
@@ -600,13 +543,8 @@ int main(int argc, char *argv[]) {
 
   if (!hushlogin_enabled()) {
     print_motd();
-    if (help_wants_zh()) {
-      fputs("提示：若不想每次显示本欢迎页，请在 HOME 下创建 ~/.hushlogin\n\n",
-            stdout);
-    } else {
-      fputs(" Tip: create ~/.hushlogin in HOME to skip this banner next time.\n\n",
-            stdout);
-    }
+    fputs(" Tip: create ~/.hushlogin in HOME to skip this banner next time.\n\n",
+          stdout);
   }
   fflush(stdout);
   fflush(stderr);

@@ -123,16 +123,38 @@ int KhslEnterUbuntuNamespace(void) {
     }
 
     if (use_ubuntu) {
+        // --- 安全管控 Step 4: User Namespace (防逃逸) ---
+        // 尝试隔离 User Namespace，将 Ubuntu 内的 root 映射为宿主机的普通用户 (UID 100000)
+        // 这是防止 sudo 提权后修改宿主机硬件时间等高危操作的核心机制
+        if (unshare(CLONE_NEWUSER) == 0) {
+            int fd = open("/proc/self/uid_map", O_WRONLY);
+            if (fd >= 0) {
+                // 映射 UID 0 -> 100000
+                write(fd, "0 100000 1\n", 11);
+                close(fd);
+            }
+            fd = open("/proc/self/setgroups", O_WRONLY);
+            if (fd >= 0) {
+                write(fd, "deny", 4);
+                close(fd);
+            }
+            fd = open("/proc/self/gid_map", O_WRONLY);
+            if (fd >= 0) {
+                // 映射 GID 0 -> 100000
+                write(fd, "0 100000 1\n", 11);
+                close(fd);
+            }
+            fprintf(stderr, "[KHTermDaemon] User Namespace isolation enabled.\n");
+        } else {
+            fprintf(stderr, "[KHTermDaemon] Warning: unshare(CLONE_NEWUSER) failed: %s\n", strerror(errno));
+        }
+
         // --- 安全管控 Step 2: 网络隔离 (Network Namespace) ---
-        // 注意：由于 OH 默认的 ip 命令不支持 veth 创建，我们暂时不强制要求 unshare CLONE_NEWNET 成功。
-        // 如果宿主机没有配置好 veth，强制隔离会导致 Ubuntu 内部完全没有网络。
-        // 我们尝试隔离，如果成功，后续在 KhslSetupGuestNetwork 中配置 loopback。
-        // 目前为了保证可用性（防止断网），我们先注释掉 CLONE_NEWNET，等待宿主机环境（iproute2）就绪。
-        /*
         if (unshare(CLONE_NEWNET) != 0) {
             fprintf(stderr, "[KHTermDaemon] Warning: unshare(CLONE_NEWNET) failed: %s\n", strerror(errno));
+        } else {
+            fprintf(stderr, "[KHTermDaemon] Network Namespace isolation enabled.\n");
         }
-        */
 
         // 1. unshare mount namespace 隔离宿主挂载表
         if (unshare(CLONE_NEWNS) != 0) {
@@ -243,51 +265,14 @@ void KhslExecShell(int use_ubuntu) {
         } else {
             (void)setgroups(0, nullptr);
         }
-    } else {
-        // --- 安全管控 Step 3: Capabilities 裁剪 ---
-        // 即使是 Ubuntu 内的 root，也剥夺其危险的 Linux Capabilities
-        // 防止加载内核模块、修改系统时钟、修改 MAC 策略等
-        struct __user_cap_header_struct cap_header;
-        struct __user_cap_data_struct cap_data[_LINUX_CAPABILITY_U32S_3];
-        
-        cap_header.version = _LINUX_CAPABILITY_VERSION_3;
-        cap_header.pid = 0; // 0 表示当前进程
-        
-        if (syscall(SYS_capget, &cap_header, &cap_data) == 0) {
-            // 剥夺 CAP_SYS_MODULE (加载/卸载内核模块)
-            cap_data[0].effective &= ~(1 << CAP_SYS_MODULE);
-            cap_data[0].permitted &= ~(1 << CAP_SYS_MODULE);
-            cap_data[0].inheritable &= ~(1 << CAP_SYS_MODULE);
-            
-            // 剥夺 CAP_SYS_BOOT (重启系统)
-            cap_data[0].effective &= ~(1 << CAP_SYS_BOOT);
-            cap_data[0].permitted &= ~(1 << CAP_SYS_BOOT);
-            cap_data[0].inheritable &= ~(1 << CAP_SYS_BOOT);
-            
-            // 剥夺 CAP_MAC_ADMIN (修改 MAC/SELinux 策略)
-            cap_data[1].effective &= ~(1 << (CAP_MAC_ADMIN - 32));
-            cap_data[1].permitted &= ~(1 << (CAP_MAC_ADMIN - 32));
-            cap_data[1].inheritable &= ~(1 << (CAP_MAC_ADMIN - 32));
-
-            // 剥夺 CAP_SYS_TIME (修改系统时间)
-            cap_data[0].effective &= ~(1 << CAP_SYS_TIME);
-            cap_data[0].permitted &= ~(1 << CAP_SYS_TIME);
-            cap_data[0].inheritable &= ~(1 << CAP_SYS_TIME);
-
-            if (syscall(SYS_capset, &cap_header, &cap_data) != 0) {
-                fprintf(stderr, "[KHTermDaemon] Warning: capset failed: %s\n", strerror(errno));
-            }
-        }
     }
 
     KhslSetupEnvironment(use_ubuntu);
 
     if (use_ubuntu) {
-        // 如果启用了网络隔离，我们需要在进入 shell 之前启动 loopback 接口
-        // system("ip link set lo up 2>/dev/null");
-        // system("ip link set veth_guest up 2>/dev/null");
-        // system("ip addr add 172.18.0.2/24 dev veth_guest 2>/dev/null");
-        // system("ip route add default via 172.18.0.1 2>/dev/null");
+        // 启动 loopback 接口，确保 Ubuntu 内部至少有 127.0.0.1
+        // 外部网络连通性需要宿主机配合创建 veth 并移入该 namespace
+        system("ip link set lo up 2>/dev/null");
         
         setenv("PATH", "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", 1);
         

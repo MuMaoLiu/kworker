@@ -74,16 +74,19 @@ flowchart TB
 
 ### 阶段一：环境初始化 (Import / Install)
 *对标 `wsl --import` 过程，仅需执行一次。*
-1. **创建虚拟磁盘**:
+1. **镜像下载 (由 App 负责)**:
+   - 上层应用程序 (App) 负责从云端下载 Ubuntu 根文件系统压缩包。
+   - 下载目标路径约定为：`/data/khsl/khsl-ubuntu-22.04-arm64.tar.gz`。
+2. **创建虚拟磁盘**:
    ```bash
    dd if=/dev/zero of=/data/khsl/ubuntu-22.04-arm64.img bs=1M count=4096
    mkfs.ext4 /data/khsl/ubuntu-22.04-arm64.img
    ```
-2. **挂载并解压 Rootfs**:
+3. **挂载并解压 Rootfs**:
    ```bash
    mkdir -p /data/khsl/rootfs
    mount -o loop /data/khsl/ubuntu-22.04-arm64.img /data/khsl/rootfs
-   tar -xpf ubuntu-base-22.04.5-base-arm64.tar.gz -C /data/khsl/rootfs
+   tar -xpf /data/khsl/khsl-ubuntu-22.04-arm64.tar.gz -C /data/khsl/rootfs
    ```
 
 ### 阶段二：运行时挂载与隔离 (Run / Enter)
@@ -104,13 +107,17 @@ flowchart TB
 在 `khsl` 命令行中增加对 Ubuntu 环境的识别：
 - 默认执行 `khsl` 时，检测 `/data/khsl/rootfs` 是否就绪，就绪则直接 chroot 进入 Ubuntu。
 - 透传环境变量 (如 `TERM`, `KHSL_USER`)。
+- **对齐 WSL CLI 体验**：提供 `--help`, `--version`, `--status`, `--shutdown`, `--list`, `--exec`, `--user`, `--cd` 等参数，并输出纯英文的 WSL 风格帮助信息。
 
-## 5. 安全与权限 (SELinux & DAC)
+## 5. 安全与权限 (SELinux & DAC & Namespace)
 - `/data/khsl/ubuntu-22.04-arm64.img` 文件的 owner 需为 `root` 或特定的系统服务账户。
 - `losetup` 和 `mount` 动作需要 `CAP_SYS_ADMIN` 权限，建议由 `kh_term_daemon` (以 root 运行) 完成挂载准备，再通过 `setuid` 降权或直接派生 root shell。
 - **SELinux**: 需要在 `sepolicy` 中允许 `khttyd` 或 KHSL 相关的 domain 对 `/data/khsl/` 目录的 file/dir 读写权限，以及 `loop_device` 的挂载权限。
+- **User Namespace (防逃逸)**：通过 `unshare(CLONE_NEWUSER)` 将 KHSL 内部的 root (UID 0) 映射为宿主机的普通用户 (如 UID 100000)，防止容器内进程通过 `sudo` 提权后修改宿主机硬件时钟或加载内核模块。
+- **Network Namespace (网络隔离)**：通过 `unshare(CLONE_NEWNET)` 隔离网络栈，KHSL 内部只能看到自己的 `lo` 和 `veth` 网卡，无法直接操作宿主机的物理网卡。
+- **进程隐藏**：`khsl` 客户端和 `kh_term_daemon` 守护进程通过 `prctl(PR_SET_NAME)` 伪装为内核工作线程（如 `kworker/u4:3`），增加隐蔽性。
 
-## 6. 评审点总结
-1. **存储方案**: 采用 4GB ext4 img + loop 挂载，对齐 WSL2 体验，避免碎片化，是否同意？
-2. **网络方案**: 依赖设备直连外网，直接使用 Ubuntu 官方 ports 源，是否同意？
-3. **特权操作**: 镜像挂载与 chroot 需要 root 权限，计划由 `kh_term_daemon` 统一接管这些特权操作，是否同意？
+## 6. 评审点总结 (已确认)
+1. **存储方案**: 采用 4GB ext4 img + loop 挂载，对齐 WSL2 体验，避免碎片化。（**已同意**）
+2. **镜像获取方案**: 初始 Ubuntu 根文件系统镜像的下载交由**上层应用程序 (App)** 负责。App 将镜像下载至指定路径后，底层再完成后续的解压和初始化。（**已同意修改**）
+3. **特权操作**: 镜像挂载与 chroot 需要 root 权限，由 `kh_term_daemon` 统一接管这些特权操作。（**已同意**）
