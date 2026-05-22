@@ -1,0 +1,12 @@
+{
+  "string": [
+    {
+      "name": "app_name",
+      "value": "文件资源管理器"
+    },
+    {
+      "name": "permission_reason",
+      "value": "需要访问文件系统以管理文件"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "文件资源管理器"
+    },
+    {
+      "name": "permission_reason",
+      "value": "需要访问文件系统以管理文件"
+    }
+  ]
+}
