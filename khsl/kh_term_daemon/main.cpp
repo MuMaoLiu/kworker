@@ -136,6 +136,12 @@ int main() {
         }
         */
 
+        int sync_pipe1[2]; // Child to Parent (I have unshared)
+        int sync_pipe2[2]; // Parent to Child (I have written maps)
+        if (pipe(sync_pipe1) < 0 || pipe(sync_pipe2) < 0) {
+            KDLOG("pipe failed: %s", strerror(errno));
+        }
+
         if (unshare(CLONE_NEWPID) != 0) {
             KDLOG("Warning: unshare(CLONE_NEWPID) failed: %s", strerror(errno));
         }
@@ -148,7 +154,39 @@ int main() {
             close(client_fd);
             exit(1);
         } else if (pid > 0) {
-            // I/O 转发进程：为 shell 子进程应用 Cgroups 限制
+            // I/O 转发进程 (Parent)
+            close(sync_pipe1[1]);
+            close(sync_pipe2[0]);
+
+            char c;
+            if (read(sync_pipe1[0], &c, 1) == 1) {
+                // Child has unshared. Write UID/GID maps from the parent (which has CAP_SETUID/GID)
+                char path[256];
+                snprintf(path, sizeof(path), "/proc/%d/uid_map", pid);
+                int fd = open(path, O_WRONLY);
+                if (fd >= 0) { 
+                    write(fd, "0 0 65536\n", 10); 
+                    close(fd); 
+                } else {
+                    KDLOG("Failed to open uid_map: %s", strerror(errno));
+                }
+
+                snprintf(path, sizeof(path), "/proc/%d/gid_map", pid);
+                fd = open(path, O_WRONLY);
+                if (fd >= 0) { 
+                    write(fd, "0 0 65536\n", 10); 
+                    close(fd); 
+                } else {
+                    KDLOG("Failed to open gid_map: %s", strerror(errno));
+                }
+            }
+            close(sync_pipe1[0]);
+
+            // Tell child to continue
+            write(sync_pipe2[1], "1", 1);
+            close(sync_pipe2[1]);
+
+            // 为 shell 子进程应用 Cgroups 限制
             KhslApplyCgroups(pid);
             
             // 设置非阻塞
@@ -201,7 +239,27 @@ int main() {
             KDLOG("session ended.");
             exit(0); // 连接处理进程退出
         } else {
-            // 子进程：调用核心逻辑隔离并进入 Ubuntu
+            // 子进程 (Child)
+            close(sync_pipe1[0]);
+            close(sync_pipe2[1]);
+
+            // --- 安全管控 Step 4: User Namespace (防逃逸) ---
+            if (unshare(CLONE_NEWUSER) == 0) {
+                KDLOG("User Namespace unshared.");
+            } else {
+                KDLOG("Warning: unshare(CLONE_NEWUSER) failed: %s", strerror(errno));
+            }
+
+            // Tell parent we unshared
+            write(sync_pipe1[1], "1", 1);
+            close(sync_pipe1[1]);
+
+            // Wait for parent to write maps
+            char c;
+            read(sync_pipe2[0], &c, 1);
+            close(sync_pipe2[0]);
+
+            // 调用核心逻辑隔离并进入 Ubuntu
             int use_ubuntu = KhslEnterUbuntuNamespace();
             KhslExecShell(use_ubuntu);
             _exit(127); // 不应该执行到这里
