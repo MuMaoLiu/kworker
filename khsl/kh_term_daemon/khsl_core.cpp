@@ -124,24 +124,22 @@ int KhslEnterUbuntuNamespace(void) {
 
     if (use_ubuntu) {
         // --- 安全管控 Step 4: User Namespace (防逃逸) ---
-        // 尝试隔离 User Namespace，将 Ubuntu 内的 root 映射为宿主机的普通用户 (UID 100000)
-        // 这是防止 sudo 提权后修改宿主机硬件时间等高危操作的核心机制
+        // 尝试隔离 User Namespace，将 Ubuntu 内的 UID 1:1 映射到宿主机 (0->0, 1->1...)
+        // 虽然 UID 映射不变，但因为进入了新的 User Namespace，进程将失去对宿主机初始 Namespace 的 Capabilities
+        // 这是防止 sudo 提权后修改宿主机硬件时间、加载内核模块等高危操作的核心机制
         if (unshare(CLONE_NEWUSER) == 0) {
             int fd = open("/proc/self/uid_map", O_WRONLY);
             if (fd >= 0) {
-                // 映射 UID 0 -> 100000
-                write(fd, "0 100000 1\n", 11);
+                // 映射 UID 0~65535 -> 0~65535
+                write(fd, "0 0 65536\n", 10);
                 close(fd);
             }
-            fd = open("/proc/self/setgroups", O_WRONLY);
-            if (fd >= 0) {
-                write(fd, "deny", 4);
-                close(fd);
-            }
+            // 因为守护进程在初始 namespace 是 root，拥有 CAP_SETGID，所以不需要 write "deny" 到 setgroups
+            // 如果 write "deny"，会导致 Ubuntu 内部的 sudo/su 无法调用 setgroups 从而报错
             fd = open("/proc/self/gid_map", O_WRONLY);
             if (fd >= 0) {
-                // 映射 GID 0 -> 100000
-                write(fd, "0 100000 1\n", 11);
+                // 映射 GID 0~65535 -> 0~65535
+                write(fd, "0 0 65536\n", 10);
                 close(fd);
             }
             fprintf(stderr, "[KHTermDaemon] User Namespace isolation enabled.\n");
@@ -192,13 +190,28 @@ int KhslEnterUbuntuNamespace(void) {
             fprintf(stderr, "[KHTermDaemon] mount dev/pts failed: %s\n", strerror(errno));
         }
 
-        // 3. chroot 进入 Ubuntu
-        if (chroot(rootfs_dir) != 0) {
-            fprintf(stderr, "[KHTermDaemon] chroot failed: %s\n", strerror(errno));
-            use_ubuntu = false; // chroot 失败，回退到普通 shell
+        // 3. pivot_root 进入 Ubuntu (比 chroot 更安全，防止逃逸)
+        char put_old[512];
+        snprintf(put_old, sizeof(put_old), "%s/mnt", rootfs_dir);
+        mkdir(put_old, 0755);
+        
+        // pivot_root 需要 new_root 是一个挂载点，我们前面已经 mount -t ext4 或 bind mount 过
+        if (syscall(SYS_pivot_root, rootfs_dir, put_old) == 0) {
+            chdir("/");
+            // 卸载旧的宿主根文件系统
+            if (umount2("/mnt", MNT_DETACH) != 0) {
+                fprintf(stderr, "[KHTermDaemon] umount2(/mnt) failed: %s\n", strerror(errno));
+            }
+            rmdir("/mnt");
         } else {
-            if (chdir("/") != 0) {
-                fprintf(stderr, "[KHTermDaemon] chdir(/) failed: %s\n", strerror(errno));
+            fprintf(stderr, "[KHTermDaemon] pivot_root failed: %s, falling back to chroot\n", strerror(errno));
+            if (chroot(rootfs_dir) != 0) {
+                fprintf(stderr, "[KHTermDaemon] chroot failed: %s\n", strerror(errno));
+                use_ubuntu = false; // chroot 失败，回退到普通 shell
+            } else {
+                if (chdir("/") != 0) {
+                    fprintf(stderr, "[KHTermDaemon] chdir(/) failed: %s\n", strerror(errno));
+                }
             }
         }
     }
