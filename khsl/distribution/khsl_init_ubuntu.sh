@@ -71,15 +71,17 @@ else
     else
         echo "[Error] Direct mount failed. Trying manual loop setup..."
         
-        # 寻找空闲的 loop 设备
+        # 寻找空闲的 loop 设备 (OpenHarmony 可能已经使用了 0-9)
         LOOP_DEV=""
-        for i in 0 1 2 3 4 5 6 7 8 9; do
+        i=0
+        while [ $i -lt 100 ]; do
             # Check if the loop device is already in use
             if ! losetup "/dev/loop$i" >/dev/null 2>&1 && ! losetup "/dev/block/loop$i" >/dev/null 2>&1; then
                 # Use /dev/block/loopX as it's more common in OpenHarmony
                 LOOP_DEV="/dev/block/loop$i"
                 break
             fi
+            i=$((i + 1))
         done
         
         if [ -n "$LOOP_DEV" ]; then

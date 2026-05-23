@@ -80,8 +80,8 @@ int KhslEnterUbuntuNamespace(void) {
                 int ret = system("mount -t ext4 -o loop /data/khsl/ubuntu-22.04-arm64.img /data/khsl/rootfs");
                 if (ret != 0) {
                     fprintf(stderr, "[KHTermDaemon] direct mount failed, trying manual losetup...\n");
-                    // 寻找空闲 loop 并挂载
-                    system("for i in 0 1 2 3 4 5 6 7 8 9; do if ! losetup /dev/loop$i >/dev/null 2>&1 && ! losetup /dev/block/loop$i >/dev/null 2>&1; then mknod /dev/block/loop$i b 7 $i 2>/dev/null; losetup /dev/block/loop$i /data/khsl/ubuntu-22.04-arm64.img && mount -t ext4 /dev/block/loop$i /data/khsl/rootfs && break; fi; done");
+                    // 寻找空闲 loop 并挂载 (OpenHarmony 可能已经使用了 0-9，所以扩展到 99)
+                    system("i=0; while [ $i -lt 100 ]; do if ! losetup /dev/loop$i >/dev/null 2>&1 && ! losetup /dev/block/loop$i >/dev/null 2>&1; then mknod /dev/block/loop$i b 7 $i 2>/dev/null; losetup /dev/block/loop$i /data/khsl/ubuntu-22.04-arm64.img && mount -t ext4 /dev/block/loop$i /data/khsl/rootfs && break; fi; i=$((i + 1)); done");
                 }
             } else {
                 fprintf(stderr, "[KHTermDaemon] Image file %s not found.\n", img_path);
