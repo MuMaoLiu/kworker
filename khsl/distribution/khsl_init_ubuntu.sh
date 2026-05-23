@@ -74,7 +74,9 @@ else
         # 寻找空闲的 loop 设备
         LOOP_DEV=""
         for i in 0 1 2 3 4 5 6 7 8 9; do
-            if ! losetup "/dev/block/loop$i" >/dev/null 2>&1; then
+            # Check if the loop device is already in use
+            if ! losetup "/dev/loop$i" >/dev/null 2>&1 && ! losetup "/dev/block/loop$i" >/dev/null 2>&1; then
+                # Use /dev/block/loopX as it's more common in OpenHarmony
                 LOOP_DEV="/dev/block/loop$i"
                 break
             fi
@@ -131,12 +133,12 @@ if [ ! -f "${ROOTFS_DIR}/etc/apt/sources.list.bak" ]; then
 fi
 
 # 替换为国内镜像源 (使用 HTTPS 协议，WSL 镜像自带了证书和 GPG)
-cat << 'EOF' > "${ROOTFS_DIR}/etc/apt/sources.list"
+cat << 'INNER_EOF' > "${ROOTFS_DIR}/etc/apt/sources.list"
 deb [trusted=yes] http://mirrors.aliyun.com/ubuntu-ports/ jammy main restricted universe multiverse
 deb [trusted=yes] http://mirrors.aliyun.com/ubuntu-ports/ jammy-updates main restricted universe multiverse
 deb [trusted=yes] http://mirrors.aliyun.com/ubuntu-ports/ jammy-security main restricted universe multiverse
 deb [trusted=yes] http://mirrors.aliyun.com/ubuntu-ports/ jammy-backports main restricted universe multiverse
-EOF
+INNER_EOF
 
 # WSL风格：初始化由 kh_term_daemon 首次进入时提示用户创建
 # 这里不再默认创建 root 用户，而是保持干净，等待首次启动时提示
