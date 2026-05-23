@@ -11,6 +11,6 @@ hdc shell "chmod +x /system/bin/khsl"
 hdc shell "chmod +x /system/bin/kh_term_daemon"
 
 echo Restarting kh_term_daemon...
-hdc shell "start kh_term_daemon"
+hdc shell "nohup /system/bin/kh_term_daemon > /dev/null 2>&1 &"
 echo Done.
 pause

@@ -161,6 +161,8 @@ int main() {
             char c;
             if (read(sync_pipe1[0], &c, 1) == 1) {
                 // Child has unshared. Write UID/GID maps from the parent (which has CAP_SETUID/GID)
+                // 1:1 mapping for all 65536 UIDs/GIDs so that root in container is root on host
+                // This avoids permission denied errors when accessing host files (like /proc, /sys, /dev)
                 char path[256];
                 snprintf(path, sizeof(path), "/proc/%d/uid_map", pid);
                 int fd = open(path, O_WRONLY);
@@ -169,6 +171,13 @@ int main() {
                     close(fd); 
                 } else {
                     KDLOG("Failed to open uid_map: %s", strerror(errno));
+                }
+
+                snprintf(path, sizeof(path), "/proc/%d/setgroups", pid);
+                fd = open(path, O_WRONLY);
+                if (fd >= 0) {
+                    write(fd, "deny", 4);
+                    close(fd);
                 }
 
                 snprintf(path, sizeof(path), "/proc/%d/gid_map", pid);

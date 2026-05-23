@@ -13,6 +13,6 @@ hdc file send \\wsl.localhost\master\home\liuboyi\master\openharmony\extension\k
 hdc shell "chmod +x /data/khsl_init_ubuntu.sh"
 
 echo Restarting kh_term_daemon...
-hdc shell "start kh_term_daemon"
+hdc shell "nohup /system/bin/kh_term_daemon > /dev/null 2>&1 &"
 echo Done.
 pause
