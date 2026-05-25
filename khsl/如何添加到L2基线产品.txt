@@ -1,0 +1,31 @@
+以vendor/kaihong/khdvk_rk3568_a/bundle.json为例，添加到文件末尾即可：
+{
+  "name": "@ohos/product_khdvk_rk3568_a",
+  "version": "4.0",
+  "license": "Apache License 2.0",
+  "private": false,
+  "scripts": {},
+  "dirs": [
+    ""
+  ],
+  "component": {
+    "name": "product_khdvk_rk3568_a",
+    "subsystem": "product_khdvk_rk3568_a",
+    "syscap": [],
+    "features": [],
+    "deps": {
+      "components": [
+        "hilog"
+      ],
+      "third_party": []
+    },
+	"build": {
+      "sub_component": [
+...
+        "//extension/khsl/kh_term_daemon:kh_term_daemon_group",
+        "//extension/khsl/bash:bash_group",
+        "//extension/khsl/khsl:khsl_group"
+	  ]
+    }
+  }
+}

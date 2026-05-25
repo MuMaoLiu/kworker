@@ -1,0 +1,149 @@
+# KHSL - KaihongOS Subsystem for Linux
+# Git ignore file for KHSL project
+
+# Build artifacts
+build/
+build-*/
+cmake-build-*/
+out/
+*.o
+*.a
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps/
+
+# Generated files
+*.pb.h
+*.pb.cc
+*.pb.go
+*.pb.py
+
+# Test artifacts
+Testing/
+test-results/
+*.log
+*.trs
+gtest_results.xml
+
+# Documentation
+docs/html/
+docs/latex/
+doxygen/
+
+# Package files
+*.deb
+*.rpm
+*.tar.gz
+*.zip
+
+# Container and image files
+*.img
+*.qcow2
+*.vdi
+*.vmdk
+containers/
+images/
+
+# Runtime data
+/data/
+/var/
+tmp/
+*.pid
+*.sock
+
+# Configuration (except examples)
+config/*.conf
+!config/*.conf.example
+
+# Log files
+*.log
+logs/
+
+# Core dumps
+core
+core.*
+*.core
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Dependency directories
+node_modules/
+vendor/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+
+# Go
+*.test
+*.out
+vendor/
+
+# Rust
+target/
+Cargo.lock
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+
+# Archives
+*.7z
+*.dmg
+*.gz
+*.iso
+*.rar
+*.tar
+*.zip
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+*.orig
+*.rej
+
+# OS generated files
+.DS_Store?
+ehthumbs.db
+Icon?
+Desktop.ini
+$RECYCLE.BIN/
+
+# KaihongOS specific
+*.hap
+*.bin
+*.ota
+out/

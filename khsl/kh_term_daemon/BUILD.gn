@@ -2,11 +2,8 @@ import("//build/ohos.gni")
 
 # at ./system/bin/kh_term_daemon
 ohos_executable("kh_term_daemon") {
-  sources = [ 
-    "main.cpp",
-    "khsl_core.cpp"
-  ]
-  include_dirs = [ "." ]
+  sources = [ "main.cpp" ]
+  include_dirs = []
   deps = []
   part_name = "product_khdvk_rk3568_a"
   subsystem_name = "product_khdvk_rk3568_a"

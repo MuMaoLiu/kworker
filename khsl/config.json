@@ -1,0 +1,502 @@
+{
+    "product_name": "khp_rk3568_mrd",
+    "device_company": "rockchip",
+    "device_build_path": "device/board/kaihong/khp_rk3568_mrd",
+    "target_cpu": "arm",
+    "type": "standard",
+    "version": "3.0",
+    "board": "khp_rk3568_mrd",
+    "api_version": 8,
+    "enable_ramdisk": true,
+    "enable_absystem": false,
+    "build_selinux": true,
+    "build_seccomp": true,
+    "inherit": [
+        "productdefine/common/inherit/rich.json",
+        "productdefine/common/inherit/chipset_common.json",
+        "productdefine/common/inherit/extension.json"
+    ],
+    "subsystems": [{
+            "subsystem": "product_khp_rk3568_mrd",
+            "components": [{
+                "component": "product_khp_rk3568_mrd",
+                "features": []
+            }]
+        },
+        {
+            "subsystem": "device_khp_rk3568_mrd",
+            "components": [{
+                "component": "device_khp_rk3568_mrd",
+                "features": []
+            }]
+        },
+        {
+            "subsystem": "security",
+            "components": [{
+                "component": "selinux_adapter",
+                "features": []
+            }]
+        },
+        {
+            "subsystem": "communication",
+            "components": [{
+                    "component": "kh_iotsdk"
+                },
+                {
+                    "component": "nfc",
+                    "features": []
+                },
+                {
+                    "component": "netmanager_ext",
+                    "features": []
+                },
+                {
+                    "component": "bluetooth_service",
+                    "features": []
+                },
+                {
+                    "component": "wifi",
+                    "features": [
+                        "wifi_feature_non_seperate_p2p = true",
+                        "wifi_feature_non_hdf_driver = true",
+                        "wifi_feature_p2p_random_mac_addr = false",
+                        "wifi_feature_with_hdi_chip_supported = false"
+                    ]
+                }
+            ]
+        },
+        {
+            "subsystem": "hdf",
+            "components": [{
+                    "component": "drivers_interface_ril",
+                    "features": []
+                },
+                {
+                    "component": "drivers_peripheral_ril",
+                    "features": []
+                },
+                {
+                    "component": "drivers_peripheral_distributed_camera",
+                    "features": [
+                        "drivers_peripheral_distributed_camera_disable_scene_mode_check = true"
+                    ]
+                }
+            ]
+        },
+        {
+            "subsystem": "arkui",
+            "components": [{
+                    "component": "ace_engine",
+                    "features": [
+                        "ace_engine_feature_enable_accessibility = true",
+                        "ace_engine_feature_enable_web = true"
+                    ]
+                },
+                {
+                    "component": "ui_appearance",
+                    "features": []
+                }
+            ]
+        },
+        {
+            "subsystem": "hdf",
+            "components": [{
+                    "component": "drivers_interface_audio",
+                    "features": []
+                },
+                {
+                    "component": "drivers_peripheral_audio",
+                    "features": [
+                        "drivers_peripheral_audio_feature_full_test_suite = true",
+                        "drivers_peripheral_audio_feature_alsa_lib = true",
+                        "drivers_peripheral_audio_feature_effect = true",
+                        "drivers_peripheral_audio_feature_param_config = true",
+                        "drivers_peripheral_audio_feature_buffer_size_level = 2"
+                    ]
+                },
+                {
+                    "component": "drivers_peripheral_codec",
+                    "features": [
+                        "drivers_peripheral_codec_feature_support_omx_extend_test = true",
+                        "drivers_peripheral_codec_feature_support_hdi_v1 = true"
+                    ]
+                },
+                {
+                    "component": "drivers_peripheral_display",
+                    "features": [
+                        "drivers_peripheral_display_community = true",
+                        "drivers_peripheral_display_vdi_default = true"
+                    ]
+                },
+                {
+                    "component": "drivers_peripheral_wlan",
+                    "features": [
+                        "drivers_peripheral_wlan_feature_enable_HDF_NL80211 = true",
+                        "drivers_peripheral_wlan_feature_enable_HDF_UT = false"
+                    ]
+                },
+                {
+                    "component": "hdf_core",
+                    "features": [
+                        "hdf_core_platform_test_support = true"
+                    ]
+                },
+                {
+                    "component": "drivers_peripheral_nfc",
+                    "features": []
+                }
+            ]
+        },
+        {
+            "subsystem": "startup",
+            "components": [{
+                "component": "init",
+                "features": [
+                    "init_feature_ab_partition = true"
+                ]
+            }]
+        },
+        {
+            "subsystem": "ai",
+            "components": [{
+                "component": "mindspore",
+                "features": []
+            }]
+        },
+        {
+            "subsystem": "msdp",
+            "components": [{
+                "component": "device_status",
+                "features": [
+                    "device_status_interaction_coordination = false"
+                ]
+            }]
+        },
+        {
+            "subsystem": "kh_updater",
+            "components": [{
+                "component": "kh_moduleupdate",
+                "features": []
+            }]
+        },
+        {
+            "subsystem": "multimedia",
+            "components": [{
+                "component": "audio_framework",
+                "features": [
+                    "audio_framework_feature_dtmf_tone = true",
+                    "audio_framework_feature_opensl_es = true",
+                    "audio_framework_feature_support_os_account = false"
+                ]
+            }]
+        },
+        {
+            "subsystem": "kh_distributed",
+            "components": [{
+                    "component": "kh_distributed_screen",
+                    "features": []
+                },
+                {
+                    "component": "kh_distributed_screen_input",
+                    "features": []
+                }
+            ]
+        },
+        {
+            "subsystem": "thirdparty",
+            "components": [{
+                    "component": "libuv",
+                    "features": [
+                        "libuv_use_ffrt = true"
+                    ]
+                },
+                {
+                    "component": "wpa_supplicant",
+                    "features": [
+                        "wpa_supplicant_driver_nl80211 = true"
+                    ]
+                },
+                {
+                    "component": "linux-pam",
+                    "features": []
+                },
+                {
+                    "component": "passwdqc",
+                    "features": []
+                },
+                {
+                    "component": "shadow",
+                    "features": []
+                },
+                {
+                    "component": "openssh",
+                    "features": []
+                },
+                {
+                    "component": "eudev",
+                    "features": []
+                },
+                {
+                    "component": "fuse-exfat",
+                    "features": []
+                }
+            ]
+        },
+        {
+            "subsystem": "tee",
+            "components": [{
+                "component": "tee_client",
+                "features": []
+            }]
+        },
+        {
+            "subsystem": "graphic",
+            "components": [{
+                    "component": "graphic_2d",
+                    "features": [
+                        "graphic_2d_feature_rs_enable_eglimage = true",
+                        "graphic_2d_feature_use_texgine = true",
+                        "graphic_2d_feature_bootanimation_enable = false"
+                    ]
+                },
+                {
+                    "component": "graphic_surface",
+                    "features": []
+                },
+                {
+                    "component": "graphic_3d",
+                    "features": []
+                },
+                {
+                    "component": "vulkan-loader",
+                    "features": []
+                },
+                {
+                    "component": "vulkan-headers",
+                    "features": []
+                }
+            ]
+        },
+        {
+            "subsystem": "kh_license",
+            "components": [{
+                "component": "license_service",
+                "features": []
+            }]
+        },
+        {
+            "subsystem": "kh_communication",
+            "components": [{
+                    "component": "kh_communication_netmanager",
+                    "features": []
+                },
+                {
+                    "component": "kh_communication_netstack",
+                    "features": [
+                        "kh_communication_netstack_feature_mqtt_server_enable = true"
+                    ]
+                },
+                {
+                    "component": "kh_communication_bluetooth",
+                    "features": []
+                },
+                {
+                    "component": "kh_communication_deviceauth",
+                    "features": []
+                },
+                {
+                    "component": "kh_communication_netconfig",
+                    "features": []
+                },
+                {
+                    "component": "kh_communication_telephony_cellular_data",
+                    "features": []
+                },
+                {
+                    "component": "kh_communication_wifi",
+                    "features": []
+                }
+            ]
+        },
+        {
+            "subsystem": "kh_applications_hap",
+            "components": [{
+                "component": "hap_kaihong",
+                "features": [
+                    "is_use_extension_hap = false"
+                ]
+            }]
+        },
+        {
+            "subsystem": "kh_edgecomputing",
+            "components": [{
+                    "component": "kh_edgecomputing_docker",
+                    "features": [
+                        "kh_edgecomputing_docker_compose_enable = true"
+                    ]
+                },
+                {
+                    "component": "kh_edgecomputing_thingmodel_meta",
+                    "features": [
+                        "kh_edgecomputing_thingmodel_meta_use_container_communication_feature = true"
+                    ]
+                },
+                {
+                    "component": "kh_edgecomputing_container_manager",
+                    "features": []
+                },
+                {
+                    "component": "kh_edgecomputing_container_comm",
+                    "features": []
+                },
+                {
+                    "component": "kh_edgecomputing_thing_accessmanager_meta",
+                    "features": [
+                        "kh_edgecomputing_thing_accessmanager_meta_refactor = true"
+                    ]
+                },
+                {
+                    "component": "khthingaccessmanager_peripherals",
+                    "features": []
+                }
+            ]
+        },
+        {
+            "subsystem": "kh_superdevice",
+            "components": [{
+                    "component": "kh_cloudcomm",
+                    "features": [
+                        "kh_cloudcomm_feature_crypt_enable = true"
+                    ]
+                },
+                {
+                    "component": "kh_superdevice_utils"
+                },
+                {
+                    "component": "superthingmodel_meta",
+                    "features": [
+                        "superthingmodel_meta_feature_crypt_enable = true",
+                        "superthingmodel_meta_feature_request_secure_info = true"
+                    ]
+                },
+                {
+                    "component": "accessmanager_meta"
+                },
+                {
+                    "component": "configuration_meta"
+                }
+            ]
+        },
+        {
+            "subsystem": "kh_peripheralmanager",
+            "components": [{
+                    "component": "uart_manager",
+                    "features": []
+                },
+                {
+                    "component": "gpio_manager",
+                    "features": []
+                }
+            ]
+        },
+        {
+            "subsystem": "kh_drivers",
+            "components": [{
+                "component": "kh_drivers_slm790",
+                "features": []
+            }]
+        },
+        {
+            "subsystem": "kh_security",
+            "components": [{
+                    "component": "kloud_account",
+                    "features": []
+                },
+                {
+                    "component": "dlp_permission",
+                    "features": []
+                },
+                {
+                    "component": "kloud_auth",
+                    "features": []
+                },
+                {
+                    "component": "otp_auth",
+                    "features": []
+                },
+                {
+                    "component": "pki_manager",
+                    "features": []
+                },
+                {
+                    "component": "crypto_infra",
+                    "features": []
+                },
+                {
+                    "component": "kh_distributed_guard",
+                    "features": []
+                }
+            ]
+        },
+        {
+            "subsystem": "kh_multimedia",
+            "components": [{
+                    "component": "miracast_framework",
+                    "features": []
+                },
+                {
+                    "component": "streaming_framework",
+                    "features": []
+                }
+            ]
+        },
+        {
+            "subsystem": "kh_dfx",
+            "components": [{
+                "component": "khstabilitymgr",
+                "features": []
+            }]
+        },
+        {
+            "subsystem": "kh_updater",
+            "components": [{
+                    "component": "khupdateservice",
+                    "features": []
+                },
+                {
+                    "component": "kh_update",
+                    "features": []
+                }
+            ]
+        },
+        {
+            "subsystem": "kh_graphic",
+            "components": [{
+                "component": "kh_windowmanager",
+                "features": [
+                    "kh_windowmanager_feature_succedent_screen_disconnect_window_hide = true"
+                ]
+            }]
+        },
+        {
+            "subsystem": "khsl",
+            "components": [{
+                "component": "khsl",
+                "features": [
+                    "khsl_feature_runtime_enable = true",
+                    "khsl_feature_container_enable = true",
+                    "khsl_feature_filesystem_enable = true",
+                    "khsl_feature_network_enable = true",
+                    "khsl_feature_security_enable = true",
+                    "khsl_feature_api_enable = true",
+                    "khsl_feature_devtools_enable = true",
+                    "khsl_enable_wsl2_compatibility = true",
+                    "khsl_enable_container_isolation = true",
+                    "khsl_enable_network_bridge = true",
+                    "khsl_enable_filesystem_integration = true",
+                    "khsl_enable_security_sandbox = true"
+                ]
+            }]
+        }
+    ]
+}
