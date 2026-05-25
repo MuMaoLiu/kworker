@@ -80,8 +80,8 @@ int KhslEnterUbuntuNamespace(void) {
                 int ret = system("mount -t ext4 -o loop /data/khsl/ubuntu-22.04-arm64.img /data/khsl/rootfs");
                 if (ret != 0) {
                     fprintf(stderr, "[KHTermDaemon] direct mount failed, trying manual losetup...\n");
-                    // 寻找空闲 loop 并挂载 (OpenHarmony 可能已经使用了 0-9，所以扩展到 99)
-                    system("i=0; while [ $i -lt 100 ]; do if ! losetup /dev/loop$i >/dev/null 2>&1 && ! losetup /dev/block/loop$i >/dev/null 2>&1; then mknod /dev/block/loop$i b 7 $i 2>/dev/null; losetup /dev/block/loop$i /data/khsl/ubuntu-22.04-arm64.img && mount -t ext4 /dev/block/loop$i /data/khsl/rootfs && break; fi; i=$((i + 1)); done");
+                    // 寻找空闲 loop 并挂载
+                    system("for i in 0 1 2 3 4 5 6 7 8 9; do if ! losetup /dev/block/loop$i >/dev/null 2>&1; then mknod /dev/block/loop$i b 7 $i 2>/dev/null; losetup /dev/block/loop$i /data/khsl/ubuntu-22.04-arm64.img && mount -t ext4 /dev/block/loop$i /data/khsl/rootfs && break; fi; done");
                 }
             } else {
                 fprintf(stderr, "[KHTermDaemon] Image file %s not found.\n", img_path);
@@ -123,6 +123,30 @@ int KhslEnterUbuntuNamespace(void) {
     }
 
     if (use_ubuntu) {
+        // --- 安全管控 Step 4: User Namespace (防逃逸) ---
+        // 尝试隔离 User Namespace，将 Ubuntu 内的 UID 1:1 映射到宿主机 (0->0, 1->1...)
+        // 虽然 UID 映射不变，但因为进入了新的 User Namespace，进程将失去对宿主机初始 Namespace 的 Capabilities
+        // 这是防止 sudo 提权后修改宿主机硬件时间、加载内核模块等高危操作的核心机制
+        if (unshare(CLONE_NEWUSER) == 0) {
+            int fd = open("/proc/self/uid_map", O_WRONLY);
+            if (fd >= 0) {
+                // 映射 UID 0~65535 -> 0~65535
+                write(fd, "0 0 65536\n", 10);
+                close(fd);
+            }
+            // 因为守护进程在初始 namespace 是 root，拥有 CAP_SETGID，所以不需要 write "deny" 到 setgroups
+            // 如果 write "deny"，会导致 Ubuntu 内部的 sudo/su 无法调用 setgroups 从而报错
+            fd = open("/proc/self/gid_map", O_WRONLY);
+            if (fd >= 0) {
+                // 映射 GID 0~65535 -> 0~65535
+                write(fd, "0 0 65536\n", 10);
+                close(fd);
+            }
+            fprintf(stderr, "[KHTermDaemon] User Namespace isolation enabled.\n");
+        } else {
+            fprintf(stderr, "[KHTermDaemon] Warning: unshare(CLONE_NEWUSER) failed: %s\n", strerror(errno));
+        }
+
         // --- 安全管控 Step 2: 网络隔离 (Network Namespace) ---
         if (unshare(CLONE_NEWNET) != 0) {
             fprintf(stderr, "[KHTermDaemon] Warning: unshare(CLONE_NEWNET) failed: %s\n", strerror(errno));
@@ -167,11 +191,6 @@ int KhslEnterUbuntuNamespace(void) {
         }
 
         // 3. pivot_root 进入 Ubuntu (比 chroot 更安全，防止逃逸)
-        // 必须先将 rootfs_dir 变成一个独立的挂载点
-        if (mount(rootfs_dir, rootfs_dir, "bind", MS_BIND | MS_REC, nullptr) != 0) {
-            fprintf(stderr, "[KHTermDaemon] bind mount rootfs to itself failed: %s\n", strerror(errno));
-        }
-
         char put_old[512];
         snprintf(put_old, sizeof(put_old), "%s/mnt", rootfs_dir);
         mkdir(put_old, 0755);
@@ -286,7 +305,7 @@ void KhslExecShell(int use_ubuntu) {
                 "        echo 'User already exists.'\n"
                 "        continue\n"
                 "    fi\n"
-                "    useradd -m -s /bin/bash -G sudo,adm \"$username\"\n"
+                "    useradd -m -s /bin/bash -G sudo,adm \"$username\" >/dev/null 2>&1\n"
                 "    if [ $? -ne 0 ]; then\n"
                 "        echo 'Failed to create user.'\n"
                 "        continue\n"
