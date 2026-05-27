@@ -24,7 +24,7 @@ action("uboot") {
   args = [
     rebase_path(uboot_build_script_dir, root_build_dir),
     rebase_path("$image_base_path/phone/images"),
-    rebase_path("//device/board/kaihong/$device_name"),
+    rebase_path("//device/board/${device_company}/$device_name"),
     rebase_path("//"),
     device_company,
     device_name,

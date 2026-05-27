@@ -4,7 +4,7 @@
 
 ## 1. 分区表
 
-**文件**：`device/board/kaihong/khdvk_rk3568_a/loader/parameter.txt`
+**文件**：`device/board/{company}/khdvk_rk3568_a/loader/parameter.txt`
 
 **当前**（节选）：
 
@@ -21,7 +21,7 @@ CMDLINE:...0x00002000@0x00690000(factory),-@0x00800000(userdata:grow)
 
 **同步修改**：
 
-- `device/board/kaihong/khdvk_rk3568_a/package_file/khdvk_rk3568_a_package_file` 增加：
+- `device/board/{company}/khdvk_rk3568_a/package_file/khdvk_rk3568_a_package_file` 增加：
   ```
   rvt    Image/rvt.img
   ```
@@ -30,7 +30,7 @@ CMDLINE:...0x00002000@0x00690000(factory),-@0x00800000(userdata:grow)
 
 ## 2. U-Boot defconfig
 
-**文件**：`device/board/kaihong/khdvk_rk3568_a/uboot/configs/khdvk_rk3568_a_defconfig`
+**文件**：`device/board/{company}/khdvk_rk3568_a/uboot/configs/khdvk_rk3568_a_defconfig`
 
 **追加配置**：
 
@@ -58,7 +58,7 @@ CONFIG_RK_HVB_LIBHVB_ENABLE_ATH_UNLOCK=y
 
 ## 3. 内核 defconfig（Phase 1，可 Phase 0 预开）
 
-**文件**：`device/board/kaihong/khdvk_rk3568_a/kernel/config/khdvk_rk3568_a/khdvk_rk3568_a_defconfig`
+**文件**：`device/board/{company}/khdvk_rk3568_a/kernel/config/khdvk_rk3568_a/khdvk_rk3568_a_defconfig`
 
 **修改**：
 
@@ -78,7 +78,7 @@ CONFIG_RK_HVB_LIBHVB_ENABLE_ATH_UNLOCK=y
 
 ## 4. fstab（Phase 1）
 
-**文件**：`vendor/kaihong/khdvk_rk3568_a/startup/init/cfg/fstab.rk3568`
+**文件**：`vendor/{company}/khdvk_rk3568_a/startup/init/cfg/fstab.rk3568`
 
 **修改示例**：
 
@@ -166,7 +166,7 @@ char *rootPartitionName = "rvt";
 ### 8.1 编译
 
 ```bash
-# 全量编译（按现有 KaihongOS 构建流程）
+# 全量编译（按现有 OpenHarmony 构建流程）
 ./build.sh --product-name khdvk_rk3568_a ...
 ```
 

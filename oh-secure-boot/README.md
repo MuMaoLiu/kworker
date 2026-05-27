@@ -1,7 +1,7 @@
-# KaihongOS 安全启动（OHVB / HVB）技术文档
+# OpenHarmony 安全启动（OHVB / HVB）技术文档
 
 > **目标平台**：RK3568（khdvk_rk3568_a）  
-> **操作系统**：KaihongOS / OpenHarmony 6.1 L2  
+> **操作系统**：OpenHarmony 6.1 L2  
 > **文档版本**：v1.0  
 > **更新日期**：2026-05-25
 
@@ -24,13 +24,13 @@
 
 ## 一句话定义
 
-**OHVB（OpenHarmony Verified Boot）** 在 KaihongOS 上的落地路径，是直接基于 OpenHarmony 官方 **HVB（Harmony Verified Boot）** 增强实现，而非从零造轮子。从芯片上电到系统分区挂载，全程签名 + 校验 + 防回滚；**v1.0 不包含 BIOS 安全启动菜单**。
+**OHVB（OpenHarmony Verified Boot）** 基于 OpenHarmony 官方 **HVB（Harmony Verified Boot）** 增强实现，而非从零造轮子。从芯片上电到系统分区挂载，全程签名 + 校验 + 防回滚；**v1.0 不包含 BIOS 安全启动菜单**。
 
 ---
 
 ## 对标关系
 
-| 能力 | Android | iOS | KaihongOS（本方案） |
+| 能力 | Android | iOS | OpenHarmony（本方案） |
 |------|---------|-----|---------------------|
 | 验签协议 | AVB 2.0 | Apple Secure Boot | **HVB 1.0**（libhvb） |
 | 根校验表 | vbmeta | AMFI / IMG4 | **RVT 分区** |
@@ -47,7 +47,7 @@
 base/startup/hvb/                          # 官方 HVB 库与 hvbtool
 base/startup/hvb/tools/kh_hvbtool.py       # Kaihong 扩展工具
 base/startup/hvb/tools/hvb_sign.py         # 镜像签名脚本
-device/board/kaihong/khdvk_rk3568_a/       # RK3568 板级配置
+device/board/{company}/khdvk_rk3568_a/       # RK3568 板级配置
 device/soc/rockchip/tools/uboot/rk356x/  # U-Boot + HVB 集成
   ├── cmd/bootkhp.c                        # Kaihong 启动命令（含 hvb_verify）
   └── lib/hvb/                             # U-Boot 侧 HVB 实现

@@ -1,4 +1,4 @@
-以vendor/kaihong/khdvk_rk3568_a/bundle.json为例，添加到文件末尾即可：
+以vendor/{company}/khdvk_rk3568_a/bundle.json为例，添加到文件末尾即可：
 {
   "name": "@ohos/product_khdvk_rk3568_a",
   "version": "4.0",

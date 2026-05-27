@@ -1,13 +1,15 @@
-# KaihongOS U-Boot BIOS（kh_bios）
+# OpenHarmony U-Boot BIOS（kh_bios）
 
 在 **U-Boot 阶段**提供 PC 风格 Setup：HDMI 图形菜单、USB 键盘 **F10** / 串口 **B** 进入、配置写入 U-Boot env，退出后 **冷复位** 再启动系统。
 
 本目录是 **kh_bios 的独立维护仓**（从 OpenHarmony 主仓拆出），包含：
 
+> **路径占位符**：文档中 `{company}` 表示设备厂商目录名（如 `device/board/{company}/`），`{product}` 表示产品/板型目录名。参考实现：`{company}=kaihong`、`{product}=khdvk_rk3568_a`。
+
 | 子目录 | 角色 | 合入 OpenHarmony 后的路径 |
 |--------|------|---------------------------|
 | `uboot_bios/` | L2 通用核心（所有产品共用） | `extension/uboot_bios/` |
-| `uboot/` | 板级薄配置（以 khdvk_rk3568_a 为参考） | `device/board/kaihong/<产品名>/uboot/` |
+| `uboot/` | 板级薄配置（以 khdvk_rk3568_a 为参考） | `device/board/{company}/{product}/uboot/` |
 
 > **维护原则**：只改 `uboot_bios/core` 与 `uboot/bios`，不要把 core 复制进板级目录；集成由 `integrate_kh_bios.sh` 在编译时完成。
 
@@ -78,7 +80,7 @@ OH=/path/to/openharmony
 ECO=/path/to/kh_application_eco/special/kh_bios
 
 rsync -a --delete "${ECO}/uboot_bios/" "${OH}/extension/uboot_bios/"
-rsync -a "${ECO}/uboot/" "${OH}/device/board/kaihong/khdvk_rk3568_a/uboot/"
+rsync -a "${ECO}/uboot/" "${OH}/device/board/{company}/khdvk_rk3568_a/uboot/"
 ```
 
 提交时建议 **两个路径一起合入**：`extension/uboot_bios` + `device/board/.../uboot`。
@@ -87,7 +89,7 @@ rsync -a "${ECO}/uboot/" "${OH}/device/board/kaihong/khdvk_rk3568_a/uboot/"
 
 ```bash
 rsync -a "${OH}/extension/uboot_bios/" "${ECO}/uboot_bios/"
-rsync -a "${OH}/device/board/kaihong/khdvk_rk3568_a/uboot/" "${ECO}/uboot/"
+rsync -a "${OH}/device/board/{company}/khdvk_rk3568_a/uboot/" "${ECO}/uboot/"
 ```
 
 ---
@@ -106,12 +108,12 @@ rsync -a "${OH}/device/board/kaihong/khdvk_rk3568_a/uboot/" "${ECO}/uboot/"
 ```bash
 cd /path/to/openharmony
 
-bash device/board/kaihong/khdvk_rk3568_a/uboot/build_uboot.sh \
+bash device/board/{company}/khdvk_rk3568_a/uboot/build_uboot.sh \
   "." \
   "/path/to/openharmony/out/arm64/khdvk_rk3568_a/packages/phone/images" \
-  "/path/to/openharmony/device/board/kaihong/khdvk_rk3568_a" \
+  "/path/to/openharmony/device/board/{company}/khdvk_rk3568_a" \
   "/path/to/openharmony" \
-  "kaihong" "khdvk_rk3568_a" "kaihong" "khdvk_rk3568_a"
+  "{company}" "khdvk_rk3568_a" "{company}" "khdvk_rk3568_a"
 ```
 
 **产物（请烧这一份）：**
@@ -128,9 +130,9 @@ out/arm64/khdvk_rk3568_a/packages/phone/images/uboot.img
 bash special/kh_bios/uboot/build_uboot.sh \
   "." \
   "${OH}/out/arm64/khdvk_rk3568_a/packages/phone/images" \
-  "${OH}/device/board/kaihong/khdvk_rk3568_a" \
+  "${OH}/device/board/{company}/khdvk_rk3568_a" \
   "${OH}" \
-  "kaihong" "khdvk_rk3568_a" "kaihong" "khdvk_rk3568_a"
+  "{company}" "khdvk_rk3568_a" "{company}" "khdvk_rk3568_a"
 ```
 
 `build_uboot.sh` 查找 `uboot_bios` 的顺序：
@@ -218,7 +220,7 @@ md5sum "$UBOOT"
 ### 1. 复制板级目录
 
 ```text
-device/board/<vendor>/<new_product>/uboot/
+device/board/{company}/{product}/uboot/
 ├── bios/
 │   ├── kh_bios_board.c
 │   ├── kh_bios_product.h

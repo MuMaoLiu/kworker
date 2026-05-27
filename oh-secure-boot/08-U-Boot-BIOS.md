@@ -6,8 +6,8 @@
 |------|------|
 | 通用核心 | `extension/uboot_bios/` |
 | 集成脚本 | `extension/uboot_bios/scripts/integrate_kh_bios.sh` |
-| 3568A 板级 | `device/board/kaihong/khdvk_rk3568_a/uboot/bios/` |
-| defconfig | `device/board/kaihong/khdvk_rk3568_a/uboot/configs/khdvk_rk3568_a_defconfig` |
+| 3568A 板级 | `device/board/{company}/khdvk_rk3568_a/uboot/bios/` |
+| defconfig | `device/board/{company}/khdvk_rk3568_a/uboot/configs/khdvk_rk3568_a_defconfig` |
 
 接入说明见 `extension/uboot_bios/README.md`。
 
@@ -15,7 +15,7 @@
 
 | # | 场景 | 操作 | 预期 |
 |---|------|------|------|
-| 1 | F10 进入 | USB 键盘，上电 3 秒内 F10 | HDMI 显示 KaihongOS Setup Utility |
+| 1 | F10 进入 | USB 键盘，上电 3 秒内 F10 | HDMI 显示 OpenHarmony Setup Utility |
 | 2 | 正常启动 | 不按键 | 串口 `[kh_bios]` 倒计时，随后 `bootkhp` 启动 |
 | 3 | 串口进入 | `kh_bios` 命令 | 进入主菜单 |
 | 4 | 系统信息 | Main → System Information | 显示板名、内存、eMMC |

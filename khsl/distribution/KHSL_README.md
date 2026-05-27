@@ -1,6 +1,6 @@
-# KHSL (Kaihong System Linux) 功能验证指南
+# KHSL (OpenHarmony System Linux) 功能验证指南
 
-本文档记录了在 KaihongOS (RK3568) 上验证 KHSL 核心功能（微内核隔离、资源限制、多用户管理、TTY 交互）的完整步骤。
+本文档记录了在 OpenHarmony (RK3568) 上验证 KHSL 核心功能（微内核隔离、资源限制、多用户管理、TTY 交互）的完整步骤。
 
 **前提条件：** 请确保已经烧录了包含最新 `kh_term_daemon`（已恢复为系统守护进程模式）和 `kh_term_daemon.cfg` 的系统镜像。
 
@@ -48,7 +48,7 @@ cat /etc/os-release
 ```bash
 ls -la /
 ```
-*(预期：看到纯净的 Ubuntu 根目录结构，如 bin, boot, dev, etc, home 等，没有 KaihongOS 的 system/vendor)*
+*(预期：看到纯净的 Ubuntu 根目录结构，如 bin, boot, dev, etc, home 等，没有 OpenHarmony 的 system/vendor)*
 
 **4. 验证 Cgroups 资源限制**
 ```bash

@@ -2,14 +2,14 @@
 
 **版本**: v1.0
 **目标硬件**: RK3568 (aarch64)
-**操作系统**: OpenHarmony / KaihongOS
+**操作系统**: OpenHarmony
 **Guest OS**: Ubuntu 22.04 LTS (arm64)
 
 ---
 
 ## 1. 背景与目标
 
-为了在 OpenHarmony 设备上提供类似 WSL (Windows Subsystem for Linux) 的原生 Linux 开发体验，本项目基于 KHSL (Kaihong Subsystem for Linux) 架构，在 RK3568 开发板上引入 Ubuntu 22.04 arm64 根文件系统。
+为了在 OpenHarmony 设备上提供类似 WSL (Windows Subsystem for Linux) 的原生 Linux 开发体验，本项目基于 KHSL (OpenHarmony Subsystem for Linux) 架构，在 RK3568 开发板上引入 Ubuntu 22.04 arm64 根文件系统。
 目标是实现环境隔离、空间可控、网络互通，并对齐 WSL2 的虚拟磁盘管理体验。
 
 ## 2. WSL 挂载机制分析与 KHSL 选型

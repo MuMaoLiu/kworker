@@ -1,6 +1,6 @@
-# kh_terminal（KaihongOS 终端）
+# kh_terminal（OpenHarmony 终端）
 
-面向 **KaihongOS** 的终端类应用示例（**非**面向社区开源 OpenHarmony 通用 ROM 的演示工程）。KaihongOS 基于 OpenHarmony 技术栈演进，本工程使用 **DevEco / API 23** 与 Stage 模型开发：主界面为 **ArkUI `Web`**，加载 `rawfile` 中的 **xterm.js** 做渲染，经 **NAPI（C++）** 创建 **PTY** 与系统 Shell 或 **KHSL / `khsl`** 等入口交互。应用包名：`com.example.kh_terminal`。
+面向 **OpenHarmony** 标准系统的终端类应用示例。本工程使用 **DevEco / API 23** 与 Stage 模型开发：主界面为 **ArkUI `Web`**，加载 `rawfile` 中的 **xterm.js** 做渲染，经 **NAPI（C++）** 创建 **PTY** 与系统 Shell 或 **KHSL / `khsl`** 等入口交互。应用包名：`com.example.kh_terminal`。
 
 ## 功能概要
 
@@ -33,13 +33,13 @@
 
 ## 构建与运行
 
-- **环境**：DevEco Studio **6.x**，SDK **API 23**（与 KaihongOS 配套工具链一致即可）。具体 `runtimeOS` 等字段以 `build-profile.json5` 为准，服务于打包工具而非“仅能在开源 OH 上运行”的声明。
+- **环境**：DevEco Studio **6.x**，SDK **API 23**（与 OpenHarmony 配套工具链一致即可）。具体 `runtimeOS` 等字段以 `build-profile.json5` 为准，服务于打包工具而非“仅能在开源 OH 上运行”的声明。
 - **依赖**：`ohpm install`；详见各 `oh-package.json5`。
 - **签名**：`build-profile.json5` 内路径随本机配置变更。
 - **CLI**：若缺 `java`，可参考 `entry/scripts/assemble-hap.ps1`，必要时先 `hvigorw.js --stop-daemon`。
 - **构建产物**：`entry/build`、`entry/.cxx`、`.hvigor` 仅为本地编译缓存（见根目录 `.gitignore`），可随时删除后重新构建。
 
-将 HAP 部署到 **KaihongOS** 设备或对应模拟器；PTY、权限与 **KHSL** 行为以 KaihongOS 产品文档为准。
+将 HAP 部署到 **OpenHarmony** 设备或对应模拟器；PTY、权限与 **KHSL** 行为以 OpenHarmony 产品文档为准。
 
 ## 桌面图标与图片文件
 
@@ -52,8 +52,8 @@
 
 替换图标时同步覆盖上述两个 `app_icon.png` 后重新打包。历史分层资源 `layered_image.json`、`foreground.png`、`background.png` 仍保留在工程中，但**已不再被 app/ability 引用**。
 
-若仍无桌面图标：先**卸载旧包**再安装新 HAP；确认桌面非「仅显示正式签名应用」；`com.example.*` 在部分定制系统上可能被策略隐藏；需向 KaihongOS 侧确认调试/侧载应用是否允许出现在工作台。
+若仍无桌面图标：先**卸载旧包**再安装新 HAP；确认桌面非「仅显示正式签名应用」；`com.example.*` 在部分定制系统上可能被策略隐藏；需向 OpenHarmony 侧确认调试/侧载应用是否允许出现在工作台。
 
 ## 维护说明
 
-PTY 路径、权限与 **KHSL** 对接在 `resolve_shell_paths` 及系统侧策略上继续按 KaihongOS 版本迭代即可。
+PTY 路径、权限与 **KHSL** 对接在 `resolve_shell_paths` 及系统侧策略上继续按 OpenHarmony 版本迭代即可。

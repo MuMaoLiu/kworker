@@ -2,14 +2,14 @@
 
 **版本**: v1.0
 **目标硬件**: RK3568 (aarch64)
-**操作系统**: KaihongOS
+**操作系统**: OpenHarmony
 **Guest OS**: Ubuntu 22.04 LTS (arm64)
 
 ---
 
 ## 1. 背景与目标
 
-为了在 KaihongOS 设备上提供类似 WSL (Windows Subsystem for Linux) 的原生 Linux 开发体验，本项目基于 KHSL (Kaihong Subsystem for Linux) 架构，在 RK3568 开发板上引入 Ubuntu 22.04 arm64 根文件系统。
+为了在 OpenHarmony 设备上提供类似 WSL (Windows Subsystem for Linux) 的原生 Linux 开发体验，本项目基于 KHSL (OpenHarmony Subsystem for Linux) 架构，在 RK3568 开发板上引入 Ubuntu 22.04 arm64 根文件系统。
 目标是实现环境隔离、空间可控、网络互通，并对齐 WSL2 的虚拟磁盘管理体验。
 
 ## 2. WSL 挂载机制分析与 KHSL 选型
@@ -20,7 +20,7 @@
 
 ### 2.2 KHSL 存储架构选型 (对齐 WSL2)
 根据设备当前的存储情况（`/data` 用户数据分区剩余 10GB），我们采用 **虚拟磁盘镜像 (ext4 img) + Loop 设备挂载** 的方案：
-- **不直接解压到 `/data` 目录**：避免 KaihongOS 宿主机的权限管理（如 SELinux、DAC）与 Ubuntu 内部的 `dpkg`/`apt` 权限发生冲突，同时避免海量小文件造成的文件系统碎片。
+- **不直接解压到 `/data` 目录**：避免 OpenHarmony 宿主机的权限管理（如 SELinux、DAC）与 Ubuntu 内部的 `dpkg`/`apt` 权限发生冲突，同时避免海量小文件造成的文件系统碎片。
 - **采用 4GB ext4 镜像文件**：在 `/data` 分区下创建一个 4GB 的 `.img` 文件，格式化为 `ext4`，通过 `losetup` 挂载。这完全等价于 WSL2 的 `ext4.vhdx` 机制。
 
 ## 3. 整体技术架构
@@ -29,7 +29,7 @@
 
 ```mermaid
 flowchart TB
-  subgraph Host [KaihongOS 宿主环境]
+  subgraph Host [OpenHarmony 宿主环境]
     KHSL[khsl CLI]
     Daemon[kh_term_daemon]
     DataDir[/data/khsl/]
@@ -101,7 +101,7 @@ flowchart TB
    - 将宿主的 DNS 配置文件覆盖或 bind 到 `/data/khsl/rootfs/etc/resolv.conf`，确保 `apt update` 正常解析。
 4. **进入环境**:
    - 使用 `chroot /data/khsl/rootfs /bin/bash` 进入环境。
-   - (进阶) 使用 `unshare -m` 创建独立的 Mount Namespace，防止 bind mounts 污染 KaihongOS 宿主的全局挂载表。
+   - (进阶) 使用 `unshare -m` 创建独立的 Mount Namespace，防止 bind mounts 污染 OpenHarmony 宿主的全局挂载表。
 
 ### 阶段三：KHSL CLI 整合
 在 `khsl` 命令行中增加对 Ubuntu 环境的识别：

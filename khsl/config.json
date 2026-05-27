@@ -1,7 +1,7 @@
 {
     "product_name": "khp_rk3568_mrd",
     "device_company": "rockchip",
-    "device_build_path": "device/board/kaihong/khp_rk3568_mrd",
+    "device_build_path": "device/board/{company}/khp_rk3568_mrd",
     "target_cpu": "arm",
     "type": "standard",
     "version": "3.0",
