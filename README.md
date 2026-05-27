@@ -23,4 +23,4 @@ KHSL 等组件在 vendor `bundle.json` 中引用示例：
   "//extension/khsl/khsl:khsl_group"
 ```
 
-`oh_bios` 合入路径见 [oh_bios/README.md](oh_bios/README.md)。
+`oh_bios` 合入路径与 **BIOS 编译开关（Kconfig / defconfig）** 见 [oh_bios/README.md](oh_bios/README.md)（[编译开关章节](oh_bios/README.md#编译开关kconfig--defconfig)）。
