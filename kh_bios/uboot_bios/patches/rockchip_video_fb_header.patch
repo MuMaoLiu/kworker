@@ -1,0 +1,21 @@
+--- a/include/video_rockchip.h
++++ b/include/video_rockchip.h
+@@ -11,6 +11,10 @@
+  #define DRM_ROCKCHIP_FB_WIDTH		1920
+  #define DRM_ROCKCHIP_FB_HEIGHT		1080
+  #define DRM_ROCKCHIP_FB_BPP		VIDEO_BPP32
++#elif defined(CONFIG_KH_BIOS)
++ #define DRM_ROCKCHIP_FB_WIDTH		1920
++ #define DRM_ROCKCHIP_FB_HEIGHT		1080
++ #define DRM_ROCKCHIP_FB_BPP		VIDEO_BPP32
+ #else
+  #define DRM_ROCKCHIP_FB_WIDTH		0
+  #define DRM_ROCKCHIP_FB_HEIGHT		0
+@@ -23,6 +27,7 @@
+ 
+ int rockchip_show_bmp(const char *bmp);
+ int rockchip_show_logo(void);
++void rockchip_show_fbbase_fmt(ulong fbbase, int w, int h, int bpp);
+ void rockchip_display_fixup(void *blob);
+ 
+ #endif

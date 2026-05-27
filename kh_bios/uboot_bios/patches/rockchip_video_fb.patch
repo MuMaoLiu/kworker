@@ -1,0 +1,25 @@
+--- a/drivers/video/drm/rockchip_display.c
++++ b/drivers/video/drm/rockchip_display.c
+@@ -1377,6 +1377,22 @@ void rockchip_show_fbbase(ulong fbbase)
+ 	}
+ }
+ 
++void rockchip_show_fbbase_fmt(ulong fbbase, int w, int h, int bpp)
++{
++	struct display_state *s;
++
++	list_for_each_entry(s, &rockchip_display_list, head) {
++		s->logo.mode = ROCKCHIP_DISPLAY_FULLSCREEN;
++		s->logo.mem = (char *)fbbase;
++		s->logo.width = w;
++		s->logo.height = h;
++		s->logo.bpp = bpp;
++		s->logo.ymirror = 0;
++
++		display_logo(s);
++	}
++}
++
+ int rockchip_show_bmp(const char *bmp)
+ {
+ 	struct display_state *s;

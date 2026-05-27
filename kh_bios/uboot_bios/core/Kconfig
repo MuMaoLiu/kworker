@@ -1,0 +1,14 @@
+config KH_BIOS
+	bool "KaihongOS U-Boot BIOS setup utility (L2)"
+	depends on DM_VIDEO
+	default n
+	help
+	  Enable KaihongOS PC-style BIOS in U-Boot with HDMI menu,
+	  USB F10 hotkey, boot and hardware configuration.
+	  Core lives in extension/uboot_bios; board ops in
+	  device/board/<product>/uboot/bios/.
+
+config KH_BIOS_HOTKEY_F10
+	bool "BIOS entry via USB keyboard F10"
+	depends on KH_BIOS && USB_KEYBOARD
+	default y if KH_BIOS
